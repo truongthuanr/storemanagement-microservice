@@ -28,6 +28,7 @@ services:
       DB_NAME: inventory_db
       DB_USER: user
       DB_PASSWORD: password
+      DATABASE_URL: mysql+pymysql://user:password@inventory-db:3306/inventory_db
     ports:
       - "8001:8000"
     volumes:
