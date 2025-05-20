@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   inventory-db:
     image: mysql:8.0
@@ -17,7 +15,8 @@ services:
 
   inventory-service:
     build:
-      context: ./inventory-service
+      context: ./inventory-service  # dùng để build local
+    image: your_dockerhub_username/inventory-service:latest  # <- thêm dòng này
     container_name: inventory-service
     restart: always
     depends_on:
