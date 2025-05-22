@@ -10,11 +10,19 @@ COPY requirements.txt .
 # Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy app source
-COPY . /app
+# Install netcat to run wait-for-it.sh 
+RUN apt-get update && apt-get install -y netcat-openbsd && rm -rf /var/lib/apt/lists/*
 
-# Expose the port FastAPI runs on
+# Copy entire project (including alembic.ini and alembic folder)
+COPY . .
+
+
+
+# Set PYTHONPATH
+ENV PYTHONPATH=/app
+
+# Expose FastAPI port
 EXPOSE 8000
 
-# Run the FastAPI app
-CMD alembic -c /app/alembic.ini upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000
+# Run migrations and start the app
+CMD alembic -c alembic.ini upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000

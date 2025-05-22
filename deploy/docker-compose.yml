@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   inventory-db:
     image: mysql:8.0
@@ -14,9 +16,7 @@ services:
       - inventory-db-data:/var/lib/mysql
 
   inventory-service:
-    build:
-      context: ./inventory-service  # dùng để build local
-    image: truongthuanr/store-management:latest  
+    image: truongthuanr/store-management:latest
     container_name: inventory-service
     restart: always
     depends_on:
@@ -30,8 +30,6 @@ services:
       DATABASE_URL: mysql+pymysql://user:password@inventory-db:3306/inventory_db
     ports:
       - "8001:8000"
-    volumes:
-      - ./inventory-service:/app
 
 volumes:
   inventory-db-data:
