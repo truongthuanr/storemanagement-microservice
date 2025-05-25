@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  inventory-db:
+    image: mysql:8.0
+    container_name: inventory-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: inventory_db
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    ports:
+      - "3306:3306"
+    volumes:
+      - inventory-db-data:/var/lib/mysql
+
+  inventory-service:
+    image: truongthuanr/store-management:latest
+    container_name: inventory-service
+    restart: always
+    depends_on:
+      - inventory-db
+    environment:
+      DB_HOST: inventory-db
+      DB_PORT: 3306
+      DB_NAME: inventory_db
+      DB_USER: user
+      DB_PASSWORD: password
+      DATABASE_URL: mysql+pymysql://user:password@inventory-db:3306/inventory_db
+    ports:
+      - "8001:8000"
+
+volumes:
+  inventory-db-data:
