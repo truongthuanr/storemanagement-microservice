@@ -1,17 +1,32 @@
+// Same as /inventory-service/protos/inventory.proto
+
 syntax = "proto3";
 
 package inventory;
 
+
 service InventoryService {
-  rpc GetInventory (InventoryRequest) returns (InventoryResponse);
+  // Lấy thông tin tồn kho theo product_id
+  rpc GetStock (StockRequest) returns (StockResponse);
+
+  // Cập nhật số lượng tồn kho
+  rpc UpdateStock (UpdateStockRequest) returns (StockResponse);
 }
 
-message InventoryRequest {
+// Yêu cầu kiểm tra tồn kho
+message StockRequest {
   int64 product_id = 1;
 }
 
-message InventoryResponse {
+// Phản hồi tồn kho
+message StockResponse {
   int64 product_id = 1;
   int32 stock = 2;
-  string warehouse_location = 3;
+  int64 price = 3;  // giá bán của sản phẩm
+}
+
+// Yêu cầu cập nhật tồn kho
+message UpdateStockRequest {
+  int64 product_id = 1;
+  int32 delta = 2;  // +/- số lượng
 }
