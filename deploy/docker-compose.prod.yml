@@ -1,6 +1,7 @@
 version: '3.8'
 
 services:
+  # Inventory DB
   inventory-db:
     image: mysql:8.0
     container_name: inventory-db
@@ -15,6 +16,7 @@ services:
     volumes:
       - inventory-db-data:/var/lib/mysql
 
+  # Inventory Service (FastAPI + gRPC server)
   inventory-service:
     image: truongthuanr/store-management:latest
     container_name: inventory-service
@@ -31,5 +33,30 @@ services:
     ports:
       - "8001:8000"
 
-volumes:
-  inventory-db-data:
+  # Product DB
+  product-db:
+    image: mysql:8.0
+    container_name: product-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: product_db
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    ports:
+      - "3307:3306"
+    volumes:
+      - product-db-data:/var/lib/mysql
+
+  # Product Service (FastAPI + gRPC client)
+  product-service:
+    image: truongthuanr/product-service:latest
+    container_name: product-service
+    restart: always
+    depends_on:
+      - product-db
+      - inventory-service
+    environment:
+      DB_HOST: product-db
+      DB_PORT: 3306
+      DB_NAME: product_d
