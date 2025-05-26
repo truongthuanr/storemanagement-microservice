@@ -32,6 +32,7 @@ services:
       PYTHONPATH: /app
     ports:
       - "8001:8000"
+      - "50051:50051" # gRPC
     volumes:
       - ./inventory-service:/app
     command: ["./wait-for-it.sh", "inventory-db", "3306", "--", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

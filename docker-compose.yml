@@ -31,7 +31,8 @@ services:
       DB_PASSWORD: password
       DATABASE_URL: mysql+pymysql://user:password@inventory-db:3306/inventory_db
     ports:
-      - "8001:8000"
+      - "8001:8000" # HTTP API
+      - "50051:50051" # gRPC
     volumes:
       - ./inventory-service:/app
 
