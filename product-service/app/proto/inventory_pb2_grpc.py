@@ -26,7 +26,11 @@ if _version_not_supported:
 
 
 class InventoryServiceStub(object):
-    """Missing associated documentation comment in .proto file."""
+    """==========================
+    Service Definitions
+    ==========================
+
+    """
 
     def __init__(self, channel):
         """Constructor.
@@ -34,30 +38,46 @@ class InventoryServiceStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.GetStock = channel.unary_unary(
-                '/inventory.InventoryService/GetStock',
-                request_serializer=inventory__pb2.StockRequest.SerializeToString,
-                response_deserializer=inventory__pb2.StockResponse.FromString,
+        self.GetInventory = channel.unary_unary(
+                '/inventory.InventoryService/GetInventory',
+                request_serializer=inventory__pb2.ProductRequest.SerializeToString,
+                response_deserializer=inventory__pb2.ProductResponse.FromString,
                 _registered_method=True)
-        self.UpdateStock = channel.unary_unary(
-                '/inventory.InventoryService/UpdateStock',
-                request_serializer=inventory__pb2.UpdateStockRequest.SerializeToString,
-                response_deserializer=inventory__pb2.StockResponse.FromString,
+        self.UpdateInventory = channel.unary_unary(
+                '/inventory.InventoryService/UpdateInventory',
+                request_serializer=inventory__pb2.ProductUpdateRequest.SerializeToString,
+                response_deserializer=inventory__pb2.UpdateInventoryResponse.FromString,
+                _registered_method=True)
+        self.ListInventory = channel.unary_unary(
+                '/inventory.InventoryService/ListInventory',
+                request_serializer=inventory__pb2.Empty.SerializeToString,
+                response_deserializer=inventory__pb2.InventoryList.FromString,
                 _registered_method=True)
 
 
 class InventoryServiceServicer(object):
-    """Missing associated documentation comment in .proto file."""
+    """==========================
+    Service Definitions
+    ==========================
 
-    def GetStock(self, request, context):
-        """Lấy thông tin tồn kho theo product_id
+    """
+
+    def GetInventory(self, request, context):
+        """Lấy thông tin inventory của một sản phẩm
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def UpdateStock(self, request, context):
-        """Cập nhật số lượng tồn kho
+    def UpdateInventory(self, request, context):
+        """Cập nhật số lượng tồn kho (tăng/giảm)
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def ListInventory(self, request, context):
+        """Lấy danh sách toàn bộ sản phẩm trong kho
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -66,15 +86,20 @@ class InventoryServiceServicer(object):
 
 def add_InventoryServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'GetStock': grpc.unary_unary_rpc_method_handler(
-                    servicer.GetStock,
-                    request_deserializer=inventory__pb2.StockRequest.FromString,
-                    response_serializer=inventory__pb2.StockResponse.SerializeToString,
+            'GetInventory': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetInventory,
+                    request_deserializer=inventory__pb2.ProductRequest.FromString,
+                    response_serializer=inventory__pb2.ProductResponse.SerializeToString,
             ),
-            'UpdateStock': grpc.unary_unary_rpc_method_handler(
-                    servicer.UpdateStock,
-                    request_deserializer=inventory__pb2.UpdateStockRequest.FromString,
-                    response_serializer=inventory__pb2.StockResponse.SerializeToString,
+            'UpdateInventory': grpc.unary_unary_rpc_method_handler(
+                    servicer.UpdateInventory,
+                    request_deserializer=inventory__pb2.ProductUpdateRequest.FromString,
+                    response_serializer=inventory__pb2.UpdateInventoryResponse.SerializeToString,
+            ),
+            'ListInventory': grpc.unary_unary_rpc_method_handler(
+                    servicer.ListInventory,
+                    request_deserializer=inventory__pb2.Empty.FromString,
+                    response_serializer=inventory__pb2.InventoryList.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -85,10 +110,14 @@ def add_InventoryServiceServicer_to_server(servicer, server):
 
  # This class is part of an EXPERIMENTAL API.
 class InventoryService(object):
-    """Missing associated documentation comment in .proto file."""
+    """==========================
+    Service Definitions
+    ==========================
+
+    """
 
     @staticmethod
-    def GetStock(request,
+    def GetInventory(request,
             target,
             options=(),
             channel_credentials=None,
@@ -101,9 +130,9 @@ class InventoryService(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/inventory.InventoryService/GetStock',
-            inventory__pb2.StockRequest.SerializeToString,
-            inventory__pb2.StockResponse.FromString,
+            '/inventory.InventoryService/GetInventory',
+            inventory__pb2.ProductRequest.SerializeToString,
+            inventory__pb2.ProductResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -115,7 +144,7 @@ class InventoryService(object):
             _registered_method=True)
 
     @staticmethod
-    def UpdateStock(request,
+    def UpdateInventory(request,
             target,
             options=(),
             channel_credentials=None,
@@ -128,9 +157,36 @@ class InventoryService(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/inventory.InventoryService/UpdateStock',
-            inventory__pb2.UpdateStockRequest.SerializeToString,
-            inventory__pb2.StockResponse.FromString,
+            '/inventory.InventoryService/UpdateInventory',
+            inventory__pb2.ProductUpdateRequest.SerializeToString,
+            inventory__pb2.UpdateInventoryResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ListInventory(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/inventory.InventoryService/ListInventory',
+            inventory__pb2.Empty.SerializeToString,
+            inventory__pb2.InventoryList.FromString,
             options,
             channel_credentials,
             insecure,

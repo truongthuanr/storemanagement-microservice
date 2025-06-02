@@ -6,20 +6,31 @@ class InventoryClient:
         self.channel = grpc.insecure_channel(f"{host}:{port}")
         self.stub = inventory_pb2_grpc.InventoryServiceStub(self.channel)
 
-    def get_stock(self, product_id: int):
-        request = inventory_pb2.StockRequest(product_id=product_id)
-        response = self.stub.GetStock(request)
+    def get_inventory(self, product_id: int):
+        # request theo protobuf model
+        request = inventory_pb2.ProductRequest(id=product_id)
+        response = self.stub.GetInventory(request)
         return {
-            "product_id": response.product_id,
-            "stock": response.stock,
-            "price": response.price
+            "id": response.id,
+            "name": response.name,
+            "description": response.description,
+            "price": float(response.price),
+            "stock": response.stock
         }
 
-    def update_stock(self, product_id: int, delta: int):
-        request = inventory_pb2.UpdateStockRequest(product_id=product_id, delta=delta)
-        response = self.stub.UpdateStock(request)
+    def update_inventory(self, product_id: int, new_stock: int):
+        # tạo ProductUpdateRequest theo protobuf model
+        product = inventory_pb2.Product(
+            id=product_id,
+            stock=new_stock,
+            # nếu các trường khác cần update thì thêm ở đây
+        )
+        request = inventory_pb2.ProductUpdateRequest(product=product)
+        response = self.stub.UpdateInventory(request)
         return {
-            "product_id": response.product_id,
-            "stock": response.stock,
-            "price": response.price
+            "id": response.product.id,
+            "name": response.product.name,
+            "description": response.product.description,
+            "price": float(response.product.price),
+            "stock": response.product.stock
         }

@@ -1,4 +1,111 @@
-"# storemanagement-microservice" 
+# StoreManagement Microservices
+
+[![Python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-High%20Performance-green.svg)](https://fastapi.tiangolo.com/)
+[![gRPC](https://img.shields.io/badge/gRPC-RPC-yellowgreen.svg)](https://grpc.io/)
+
+## Overview
+
+**StoreManagement** is a microservice-based system designed to manage retail operations. Each core business function is separated into its own FastAPI-based service, ensuring modularity, scalability, and ease of maintenance.
+
+### Current Services
+
+- **Inventory Service**: Manages stock levels and pricing, provides both REST API and gRPC interface.
+- **Product Service**: Manages product information and communicates with the Inventory Service via gRPC.
+
+---
+
+## Project Structure 
+```
+storemanagement-microservice/
+├── inventory-service/
+│ ├── app/
+│ │ ├── api/ # (Optional) REST API routes
+│ │ ├── proto/ # gRPC definitions and generated code
+│ │ ├── services/ # gRPC server logic
+│ │ ├── db/ # SQLAlchemy models and DB setup
+│ │ └── main.py # Application entrypoint
+│ ├── Dockerfile
+│ └── requirements.txt
+│
+├── product-service/
+│ ├── app/
+│ │ ├── api/ # REST API routes for product management
+│ │ ├── proto/ # Compiled gRPC client for Inventory Service
+│ │ ├── services/ # Business logic + gRPC client
+│ │ ├── db/ # SQLAlchemy models and DB connection
+│ │ └── main.py # Application entrypoint
+│ ├── Dockerfile
+│ └── requirements.txt
+│
+├── docker-compose.dev.yml # Docker Compose for development
+├── docker-compose.prod.yml # Docker Compose for production
+└── README.md
+
+```
+
+
+
+---
+
+## Prerequisites
+
+- Python 3.10+
+- Docker & Docker Compose
+- MySQL 8.0 (runs in a container via Compose)
+
+---
+
+## Run the Project (Development)
+
+```bash
+git clone -b productservice-dev https://github.com/truongthuanr/storemanagement-microservice.git
+cd storemanagement-microservice
+docker-compose -f docker-compose.dev.yml up --build
+```
+
+#### Service endpoints:
+
+- Inventory Service: http://localhost:8001
+
+- Product Service: http://localhost:8002
+
+## gRPC Communication
+
+- Product Service acts as a gRPC client to communicate with Inventory Service.
+
+- Communication is done via defined .proto interfaces (compiled using grpcio-tools).
+
+- All internal services can resolve each other by container name (Docker network).
+
+Example usage:
+```bash
+python -m grpc_tools.protoc \
+  -I=inventory-service/protos \
+  --python_out=inventory-service/app/proto \
+  --grpc_python_out=inventory-service/app/proto \
+  inventory-service/protos/inventory.proto
+```
+Technologies Used
+| Feature           | Technology                               |
+| ----------------- | ---------------------------------------- |
+| API Framework     | [FastAPI](https://fastapi.tiangolo.com/) |
+| RPC Communication | [gRPC](https://grpc.io/)                 |
+| Database          | MySQL + SQLAlchemy ORM                   |
+| Containerization  | Docker + Docker Compose                  |
+| Code Generation   | grpcio-tools                             |
+| Dev Environment   | Linux / WSL / Docker Desktop             |
+
+
+## Contact
+
+For questions or collaboration, feel free to open an issue or submit a pull request on GitHub.
+
+
+
+##
+# **Draft**
+# storemanagement-microservice
 
 ## Microservice
 

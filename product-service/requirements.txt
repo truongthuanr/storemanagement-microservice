@@ -5,3 +5,4 @@ pymysql
 pydantic
 grpcio
 grpcio-tools
+pydantic_settings

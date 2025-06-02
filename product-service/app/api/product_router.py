@@ -1,10 +1,12 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database.database import SessionLocal
-from app.schemas import product as schema
-from app.crud import product as crud
-from app.services.inventory_client import get_inventory
+from app.schemas import product_schema as schema
+from app.crud import product_crud as crud
+# from app.services.inventory_client import get_inventory
 from app.services.inventory_client import InventoryClient
+import grpc
+
 
 router = APIRouter()
 
@@ -25,4 +27,11 @@ def read_product(product_id: int, db: Session = Depends(get_db)):
 
 @router.get("/products/{product_id}/inventory")
 def read_product_inventory(product_id: int):
-    return get_inventory(product_id)
+    inventory_client = InventoryClient()
+    try:
+        inventory = inventory_client.get_inventory(product_id)
+        if not inventory:
+            raise HTTPException(status_code=404, detail="Inventory Not Found!!!")
+        return inventory
+    except grpc.RpcError as e:
+        raise HTTPException(status_code=500, detail=f"gRPC error: {e.details()}")
