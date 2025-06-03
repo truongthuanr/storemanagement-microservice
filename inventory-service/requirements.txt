@@ -10,3 +10,6 @@ mysqlclient==2.2.4
 
 # Tùy chọn: hỗ trợ thời gian
 python-dotenv==1.0.1
+pydantic_settings
+pymysql
+pydantic

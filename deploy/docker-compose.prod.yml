@@ -1,7 +1,6 @@
-version: '3.8'
+version: "3.9"
 
 services:
-  # Inventory DB
   inventory-db:
     image: mysql:8.0
     container_name: inventory-db
@@ -12,13 +11,12 @@ services:
       MYSQL_USER: user
       MYSQL_PASSWORD: password
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
       - inventory-db-data:/var/lib/mysql
 
-  # Inventory Service (FastAPI + gRPC server)
   inventory-service:
-    image: truongthuanr/store-management:latest
+    image: truongthuanr/inventory-service:latest
     container_name: inventory-service
     restart: always
     depends_on:
@@ -30,10 +28,12 @@ services:
       DB_USER: user
       DB_PASSWORD: password
       DATABASE_URL: mysql+pymysql://user:password@inventory-db:3306/inventory_db
+      PYTHONPATH: /app
     ports:
       - "8001:8000"
+      - "50051:50051"
+    command: ["./wait-for-it.sh", "inventory-db", "3306", "--", "python", "app/server.py"]
 
-  # Product DB
   product-db:
     image: mysql:8.0
     container_name: product-db
@@ -44,11 +44,15 @@ services:
       MYSQL_USER: user
       MYSQL_PASSWORD: password
     ports:
-      - "3307:3306"
+      - "3308:3306"
     volumes:
       - product-db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
-  # Product Service (FastAPI + gRPC client)
   product-service:
     image: truongthuanr/product-service:latest
     container_name: product-service
@@ -59,4 +63,16 @@ services:
     environment:
       DB_HOST: product-db
       DB_PORT: 3306
-      DB_NAME: product_d
+      DB_NAME: product_db
+      DB_USER: user
+      DB_PASSWORD: password
+      DATABASE_URL: mysql+pymysql://user:password@product-db:3306/product_db
+      INVENTORY_GRPC_HOST: inventory-service
+      INVENTORY_GRPC_PORT: 50051
+    ports:
+      - "8002:8000"
+    command: ["./wait-for-it.sh", "product-db", "3306", "--", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+
+volumes:
+  inventory-db-data:
+  product-db-data:

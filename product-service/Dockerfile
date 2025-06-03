@@ -14,6 +14,7 @@ RUN apt-get update && apt-get install -y \
 # ---- Install Python dependencies ----
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir cryptography
 
 # Install netcat to run wait-for-it.sh 
 RUN apt-get update && apt-get install -y netcat-openbsd && rm -rf /var/lib/apt/lists/*
