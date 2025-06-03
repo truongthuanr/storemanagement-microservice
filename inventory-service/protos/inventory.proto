@@ -10,16 +10,23 @@ option go_package = "inventorypb";
 
 message Empty {}
 
-message ProductRequest {
-  int32 product_id = 1;
+message InventoryRequest {
+  int32 inventory_id = 1;
 }
 
-message ProductUpdateRequest {
-  int32 product_id = 1;
-  int32 stock_change = 2; // số lượng tăng (+) hoặc giảm (-)
+message InventoryUpdateRequest {
+  int32 inventory_id = 1;
+  int32 stock_change = 2;
 }
 
-message Product {
+message CreateInventoryRequest {
+  string name = 1;
+  string description = 2;
+  double price = 3;
+  int32 stock = 4;
+}
+
+message InventoryItem {
   int32 id = 1;
   string name = 2;
   string description = 3;
@@ -29,17 +36,17 @@ message Product {
   string updated_at = 7;
 }
 
-message ProductResponse {
-  Product product = 1;
+message InventoryResponse {
+  InventoryItem item = 1;
 }
 
 message UpdateInventoryResponse {
   string message = 1;
-  Product updated_product = 2;
+  InventoryItem updated_item = 2;
 }
 
 message InventoryList {
-  repeated Product products = 1;
+  repeated InventoryItem items = 1;
 }
 
 // ==========================
@@ -47,12 +54,8 @@ message InventoryList {
 // ==========================
 
 service InventoryService {
-  // Lấy thông tin inventory của một sản phẩm
-  rpc GetInventory(ProductRequest) returns (ProductResponse);
-
-  // Cập nhật số lượng tồn kho (tăng/giảm)
-  rpc UpdateInventory(ProductUpdateRequest) returns (UpdateInventoryResponse);
-
-  // Lấy danh sách toàn bộ sản phẩm trong kho
+  rpc CreateInventory(CreateInventoryRequest) returns (InventoryResponse);
+  rpc GetInventory(InventoryRequest) returns (InventoryResponse);
+  rpc UpdateInventory(InventoryUpdateRequest) returns (UpdateInventoryResponse);
   rpc ListInventory(Empty) returns (InventoryList);
 }

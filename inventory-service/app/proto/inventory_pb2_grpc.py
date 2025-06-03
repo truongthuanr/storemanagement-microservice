@@ -38,14 +38,19 @@ class InventoryServiceStub(object):
         Args:
             channel: A grpc.Channel.
         """
+        self.CreateInventory = channel.unary_unary(
+                '/inventory.InventoryService/CreateInventory',
+                request_serializer=inventory__pb2.CreateInventoryRequest.SerializeToString,
+                response_deserializer=inventory__pb2.InventoryResponse.FromString,
+                _registered_method=True)
         self.GetInventory = channel.unary_unary(
                 '/inventory.InventoryService/GetInventory',
-                request_serializer=inventory__pb2.ProductRequest.SerializeToString,
-                response_deserializer=inventory__pb2.ProductResponse.FromString,
+                request_serializer=inventory__pb2.InventoryRequest.SerializeToString,
+                response_deserializer=inventory__pb2.InventoryResponse.FromString,
                 _registered_method=True)
         self.UpdateInventory = channel.unary_unary(
                 '/inventory.InventoryService/UpdateInventory',
-                request_serializer=inventory__pb2.ProductUpdateRequest.SerializeToString,
+                request_serializer=inventory__pb2.InventoryUpdateRequest.SerializeToString,
                 response_deserializer=inventory__pb2.UpdateInventoryResponse.FromString,
                 _registered_method=True)
         self.ListInventory = channel.unary_unary(
@@ -62,23 +67,26 @@ class InventoryServiceServicer(object):
 
     """
 
+    def CreateInventory(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
     def GetInventory(self, request, context):
-        """Lấy thông tin inventory của một sản phẩm
-        """
+        """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
     def UpdateInventory(self, request, context):
-        """Cập nhật số lượng tồn kho (tăng/giảm)
-        """
+        """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
     def ListInventory(self, request, context):
-        """Lấy danh sách toàn bộ sản phẩm trong kho
-        """
+        """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
@@ -86,14 +94,19 @@ class InventoryServiceServicer(object):
 
 def add_InventoryServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
+            'CreateInventory': grpc.unary_unary_rpc_method_handler(
+                    servicer.CreateInventory,
+                    request_deserializer=inventory__pb2.CreateInventoryRequest.FromString,
+                    response_serializer=inventory__pb2.InventoryResponse.SerializeToString,
+            ),
             'GetInventory': grpc.unary_unary_rpc_method_handler(
                     servicer.GetInventory,
-                    request_deserializer=inventory__pb2.ProductRequest.FromString,
-                    response_serializer=inventory__pb2.ProductResponse.SerializeToString,
+                    request_deserializer=inventory__pb2.InventoryRequest.FromString,
+                    response_serializer=inventory__pb2.InventoryResponse.SerializeToString,
             ),
             'UpdateInventory': grpc.unary_unary_rpc_method_handler(
                     servicer.UpdateInventory,
-                    request_deserializer=inventory__pb2.ProductUpdateRequest.FromString,
+                    request_deserializer=inventory__pb2.InventoryUpdateRequest.FromString,
                     response_serializer=inventory__pb2.UpdateInventoryResponse.SerializeToString,
             ),
             'ListInventory': grpc.unary_unary_rpc_method_handler(
@@ -117,6 +130,33 @@ class InventoryService(object):
     """
 
     @staticmethod
+    def CreateInventory(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/inventory.InventoryService/CreateInventory',
+            inventory__pb2.CreateInventoryRequest.SerializeToString,
+            inventory__pb2.InventoryResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
     def GetInventory(request,
             target,
             options=(),
@@ -131,8 +171,8 @@ class InventoryService(object):
             request,
             target,
             '/inventory.InventoryService/GetInventory',
-            inventory__pb2.ProductRequest.SerializeToString,
-            inventory__pb2.ProductResponse.FromString,
+            inventory__pb2.InventoryRequest.SerializeToString,
+            inventory__pb2.InventoryResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -158,7 +198,7 @@ class InventoryService(object):
             request,
             target,
             '/inventory.InventoryService/UpdateInventory',
-            inventory__pb2.ProductUpdateRequest.SerializeToString,
+            inventory__pb2.InventoryUpdateRequest.SerializeToString,
             inventory__pb2.UpdateInventoryResponse.FromString,
             options,
             channel_credentials,

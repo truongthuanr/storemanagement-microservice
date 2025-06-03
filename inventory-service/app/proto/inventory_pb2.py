@@ -24,7 +24,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0finventory.proto\x12\tinventory\"\x07\n\x05\x45mpty\"$\n\x0eProductRequest\x12\x12\n\nproduct_id\x18\x01 \x01(\x05\"@\n\x14ProductUpdateRequest\x12\x12\n\nproduct_id\x18\x01 \x01(\x05\x12\x14\n\x0cstock_change\x18\x02 \x01(\x05\"~\n\x07Product\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x13\n\x0b\x64\x65scription\x18\x03 \x01(\t\x12\r\n\x05price\x18\x04 \x01(\x01\x12\r\n\x05stock\x18\x05 \x01(\x05\x12\x12\n\ncreated_at\x18\x06 \x01(\t\x12\x12\n\nupdated_at\x18\x07 \x01(\t\"6\n\x0fProductResponse\x12#\n\x07product\x18\x01 \x01(\x0b\x32\x12.inventory.Product\"W\n\x17UpdateInventoryResponse\x12\x0f\n\x07message\x18\x01 \x01(\t\x12+\n\x0fupdated_product\x18\x02 \x01(\x0b\x32\x12.inventory.Product\"5\n\rInventoryList\x12$\n\x08products\x18\x01 \x03(\x0b\x32\x12.inventory.Product2\xee\x01\n\x10InventoryService\x12\x45\n\x0cGetInventory\x12\x19.inventory.ProductRequest\x1a\x1a.inventory.ProductResponse\x12V\n\x0fUpdateInventory\x12\x1f.inventory.ProductUpdateRequest\x1a\".inventory.UpdateInventoryResponse\x12;\n\rListInventory\x12\x10.inventory.Empty\x1a\x18.inventory.InventoryListB\rZ\x0binventorypbb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0finventory.proto\x12\tinventory\"\x07\n\x05\x45mpty\"(\n\x10InventoryRequest\x12\x14\n\x0cinventory_id\x18\x01 \x01(\x05\"D\n\x16InventoryUpdateRequest\x12\x14\n\x0cinventory_id\x18\x01 \x01(\x05\x12\x14\n\x0cstock_change\x18\x02 \x01(\x05\"Y\n\x16\x43reateInventoryRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x13\n\x0b\x64\x65scription\x18\x02 \x01(\t\x12\r\n\x05price\x18\x03 \x01(\x01\x12\r\n\x05stock\x18\x04 \x01(\x05\"\x84\x01\n\rInventoryItem\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x13\n\x0b\x64\x65scription\x18\x03 \x01(\t\x12\r\n\x05price\x18\x04 \x01(\x01\x12\r\n\x05stock\x18\x05 \x01(\x05\x12\x12\n\ncreated_at\x18\x06 \x01(\t\x12\x12\n\nupdated_at\x18\x07 \x01(\t\";\n\x11InventoryResponse\x12&\n\x04item\x18\x01 \x01(\x0b\x32\x18.inventory.InventoryItem\"Z\n\x17UpdateInventoryResponse\x12\x0f\n\x07message\x18\x01 \x01(\t\x12.\n\x0cupdated_item\x18\x02 \x01(\x0b\x32\x18.inventory.InventoryItem\"8\n\rInventoryList\x12\'\n\x05items\x18\x01 \x03(\x0b\x32\x18.inventory.InventoryItem2\xc8\x02\n\x10InventoryService\x12R\n\x0f\x43reateInventory\x12!.inventory.CreateInventoryRequest\x1a\x1c.inventory.InventoryResponse\x12I\n\x0cGetInventory\x12\x1b.inventory.InventoryRequest\x1a\x1c.inventory.InventoryResponse\x12X\n\x0fUpdateInventory\x12!.inventory.InventoryUpdateRequest\x1a\".inventory.UpdateInventoryResponse\x12;\n\rListInventory\x12\x10.inventory.Empty\x1a\x18.inventory.InventoryListB\rZ\x0binventorypbb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -34,18 +34,20 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['DESCRIPTOR']._serialized_options = b'Z\013inventorypb'
   _globals['_EMPTY']._serialized_start=30
   _globals['_EMPTY']._serialized_end=37
-  _globals['_PRODUCTREQUEST']._serialized_start=39
-  _globals['_PRODUCTREQUEST']._serialized_end=75
-  _globals['_PRODUCTUPDATEREQUEST']._serialized_start=77
-  _globals['_PRODUCTUPDATEREQUEST']._serialized_end=141
-  _globals['_PRODUCT']._serialized_start=143
-  _globals['_PRODUCT']._serialized_end=269
-  _globals['_PRODUCTRESPONSE']._serialized_start=271
-  _globals['_PRODUCTRESPONSE']._serialized_end=325
-  _globals['_UPDATEINVENTORYRESPONSE']._serialized_start=327
-  _globals['_UPDATEINVENTORYRESPONSE']._serialized_end=414
-  _globals['_INVENTORYLIST']._serialized_start=416
-  _globals['_INVENTORYLIST']._serialized_end=469
-  _globals['_INVENTORYSERVICE']._serialized_start=472
-  _globals['_INVENTORYSERVICE']._serialized_end=710
+  _globals['_INVENTORYREQUEST']._serialized_start=39
+  _globals['_INVENTORYREQUEST']._serialized_end=79
+  _globals['_INVENTORYUPDATEREQUEST']._serialized_start=81
+  _globals['_INVENTORYUPDATEREQUEST']._serialized_end=149
+  _globals['_CREATEINVENTORYREQUEST']._serialized_start=151
+  _globals['_CREATEINVENTORYREQUEST']._serialized_end=240
+  _globals['_INVENTORYITEM']._serialized_start=243
+  _globals['_INVENTORYITEM']._serialized_end=375
+  _globals['_INVENTORYRESPONSE']._serialized_start=377
+  _globals['_INVENTORYRESPONSE']._serialized_end=436
+  _globals['_UPDATEINVENTORYRESPONSE']._serialized_start=438
+  _globals['_UPDATEINVENTORYRESPONSE']._serialized_end=528
+  _globals['_INVENTORYLIST']._serialized_start=530
+  _globals['_INVENTORYLIST']._serialized_end=586
+  _globals['_INVENTORYSERVICE']._serialized_start=589
+  _globals['_INVENTORYSERVICE']._serialized_end=917
 # @@protoc_insertion_point(module_scope)
