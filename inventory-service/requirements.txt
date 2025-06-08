@@ -1,7 +1,15 @@
-fastapi
-uvicorn[standard]
-sqlalchemy
-pymysql
-alembic
-cryptography
+grpcio==1.71.0
+grpcio-tools==1.71.0
+protobuf
+# uvicorn==0.30.1
+# fastapi==0.111.0
+
+# ORM nếu dùng SQLAlchemy
+sqlalchemy==2.0.30
+mysqlclient==2.2.4
+
+# Tùy chọn: hỗ trợ thời gian
+python-dotenv==1.0.1
 pydantic_settings
+pymysql
+pydantic

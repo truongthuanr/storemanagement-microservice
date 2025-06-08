@@ -5,8 +5,8 @@ from sqlalchemy.orm import relationship
 # Tạo base cho các mô hình
 Base = declarative_base()
 
-class Product(Base):
-    __tablename__ = 'products'
+class Inventory(Base):
+    __tablename__ = 'inventory'
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(255), nullable=False)

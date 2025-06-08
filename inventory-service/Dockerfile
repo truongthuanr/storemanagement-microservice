@@ -1,28 +1,23 @@
-# Base image
 FROM python:3.11-slim
 
-# Set working directory
 WORKDIR /app
 
-# Copy dependencies
+# Cài đặt thư viện hệ thống cần thiết cho mysqlclient và netcat
+RUN apt-get update && apt-get install -y \
+    gcc \
+    default-libmysqlclient-dev \
+    pkg-config \
+    build-essential \
+    python3-dev \
+    netcat-openbsd \
+ && rm -rf /var/lib/apt/lists/*
+
 COPY requirements.txt .
 
-# Install dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --upgrade pip && pip install -r requirements.txt
 
-# Install netcat to run wait-for-it.sh 
-RUN apt-get update && apt-get install -y netcat-openbsd && rm -rf /var/lib/apt/lists/*
-
-# Copy entire project (including alembic.ini and alembic folder)
 COPY . .
 
+EXPOSE 50051
 
-
-# Set PYTHONPATH
-ENV PYTHONPATH=/app
-
-# Expose FastAPI port
-EXPOSE 8000
-
-# Run migrations and start the app
-CMD alembic -c alembic.ini upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000
+CMD ["python", "app/server.py"]

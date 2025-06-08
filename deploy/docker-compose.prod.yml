@@ -4,7 +4,7 @@ services:
   inventory-db:
     image: mysql:8.0
     container_name: inventory-db
-    restart: no
+    restart: always
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: inventory_db
@@ -14,18 +14,11 @@ services:
       - "3307:3306"
     volumes:
       - inventory-db-data:/var/lib/mysql
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 5s
-      timeout: 3s
-      retries: 5
 
   inventory-service:
-    build:
-      context: ./inventory-service
     image: truongthuanr/inventory-service:latest
     container_name: inventory-service
-    restart: no
+    restart: always
     depends_on:
       - inventory-db
     environment:
@@ -39,14 +32,12 @@ services:
     ports:
       - "8001:8000"
       - "50051:50051"
-    volumes:
-      - ./inventory-service:/app
     command: ["./wait-for-it.sh", "inventory-db", "3306", "--", "python", "app/server.py"]
 
   product-db:
     image: mysql:8.0
     container_name: product-db
-    restart: no
+    restart: always
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: product_db
@@ -63,12 +54,11 @@ services:
       retries: 5
 
   product-service:
-    build:
-      context: ./product-service
     image: truongthuanr/product-service:latest
     container_name: product-service
-    restart: no
+    restart: always
     depends_on:
+      - product-db
       - inventory-service
     environment:
       DB_HOST: product-db
@@ -81,8 +71,6 @@ services:
       INVENTORY_GRPC_PORT: 50051
     ports:
       - "8002:8000"
-    volumes:
-      - ./product-service:/app
     command: ["./wait-for-it.sh", "product-db", "3306", "--", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
 
 volumes:
