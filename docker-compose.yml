@@ -1,4 +1,4 @@
-version: "3.9"
+# version: "3.9"
 
 services:
   inventory-db:
@@ -19,15 +19,29 @@ services:
       interval: 5s
       timeout: 3s
       retries: 5
+    networks:
+      - backend
+  
+  rabbitmq:
+    image: rabbitmq:3-management
+    hostname: rabbitmq
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - backend
 
   inventory-service:
     build:
       context: ./inventory-service
-    image: truongthuanr/inventory-service:latest
+    image: inventory-service:latest
+    # image: truongthuanr/inventory-service:latest
     container_name: inventory-service
     restart: no
     depends_on:
       - inventory-db
+      - rabbitmq
     environment:
       DB_HOST: inventory-db
       DB_PORT: 3306
@@ -41,7 +55,10 @@ services:
       - "50051:50051"
     volumes:
       - ./inventory-service:/app
-    command: ["./wait-for-it.sh", "inventory-db", "3306", "--", "python", "app/server.py"]
+    # command: ["./wait-for-it.sh", "inventory-db", "3306", "--", "python", "app/main.py"]
+    command: sh -c "./wait-for-it.sh inventory-db 3306 -- python app/main.py"
+    networks:
+      - backend
 
   product-db:
     image: mysql:8.0
@@ -61,6 +78,8 @@ services:
       interval: 5s
       timeout: 3s
       retries: 5
+    networks:
+      - backend
 
   product-service:
     build:
@@ -84,7 +103,12 @@ services:
     volumes:
       - ./product-service:/app
     command: ["./wait-for-it.sh", "product-db", "3306", "--", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+    networks:
+      - backend
 
 volumes:
   inventory-db-data:
   product-db-data:
+
+networks:
+  backend:

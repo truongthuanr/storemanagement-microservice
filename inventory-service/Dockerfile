@@ -20,4 +20,4 @@ COPY . .
 
 EXPOSE 50051
 
-CMD ["python", "app/server.py"]
+CMD ["python", "app/main.py"]
