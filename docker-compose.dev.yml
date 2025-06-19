@@ -35,8 +35,8 @@ services:
   inventory-service:
     build:
       context: ./inventory-service
-    image: inventory-service:latest
-    # image: truongthuanr/inventory-service:latest
+    # image: inventory-service:latest
+    image: truongthuanr/inventory-service:latest
     container_name: inventory-service
     restart: no
     depends_on:
@@ -149,6 +149,7 @@ services:
     volumes:
       - ./order-service:/app
     command: ["./wait-for-it.sh", "order-db", "3306", "--", "python", "app/main.py"]
+    # command: sh -c "./wait-for-it.sh order-db 3306 -- python app/main.py"
     networks:
       - backend
 

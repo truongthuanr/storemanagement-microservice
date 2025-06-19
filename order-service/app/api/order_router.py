@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List
 
 from app.database.database import get_db
-from app.crud import crud_order
+from app.crud import order_crud
 from app.schemas.order_schema import (
     OrderCreate, OrderRead, OrderStatusUpdate, OrderStatusEnum
 )
@@ -15,17 +15,17 @@ router = APIRouter(
 
 @router.post("/", response_model=OrderRead, status_code=status.HTTP_201_CREATED)
 def create_order(order: OrderCreate, db: Session = Depends(get_db)):
-    return crud_order.create_order(db, order)
+    return order_crud.create_order(db, order)
 
 
 @router.get("/", response_model=List[OrderRead])
 def get_all_orders(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    return crud_order.get_all_orders(db, skip=skip, limit=limit)
+    return order_crud.get_all_orders(db, skip=skip, limit=limit)
 
 
 @router.get("/{order_id}", response_model=OrderRead)
 def get_order(order_id: int, db: Session = Depends(get_db)):
-    order = crud_order.get_order(db, order_id)
+    order = order_crud.get_order(db, order_id)
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
     return order
@@ -33,7 +33,7 @@ def get_order(order_id: int, db: Session = Depends(get_db)):
 
 @router.patch("/{order_id}/status", response_model=OrderRead)
 def update_order_status(order_id: int, status_update: OrderStatusUpdate, db: Session = Depends(get_db)):
-    order = crud_order.update_order_status(db, order_id, status_update.status)
+    order = order_crud.update_order_status(db, order_id, status_update.status)
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
     return order
@@ -41,7 +41,7 @@ def update_order_status(order_id: int, status_update: OrderStatusUpdate, db: Ses
 
 @router.delete("/{order_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_order(order_id: int, db: Session = Depends(get_db)):
-    success = crud_order.delete_order(db, order_id)
+    success = order_crud.delete_order(db, order_id)
     if not success:
         raise HTTPException(status_code=404, detail="Order not found")
     return
