@@ -37,4 +37,8 @@
     
     # ---- Run the FastAPI app ----
     # CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+    # CMD ["sh", "-c", "./wait-for-it.sh order-db 3306 -- python app/main.py"]
+    CMD ["sh", "-c", "./wait-for-it.sh order-db 3306 -- python -m app.main"]
+
+
     

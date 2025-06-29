@@ -37,6 +37,7 @@ services:
       context: ./inventory-service
     # image: inventory-service:latest
     image: truongthuanr/inventory-service:latest
+    working_dir: /app
     container_name: inventory-service
     restart: no
     depends_on:
@@ -85,6 +86,7 @@ services:
     build:
       context: ./product-service
     image: truongthuanr/product-service:latest
+    working_dir: /app
     container_name: product-service
     restart: no
     depends_on:
@@ -102,7 +104,7 @@ services:
       - "8002:8000"
     volumes:
       - ./product-service:/app
-    command: ["./wait-for-it.sh", "product-db", "3306", "--", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+    # command: ["./wait-for-it.sh", "product-db", "3306", "--", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
     networks:
       - backend
 
@@ -131,6 +133,7 @@ services:
     build:
       context: ./order-service
     image: truongthuanr/order-service:latest
+    working_dir: /app
     container_name: order-service
     restart: no
     depends_on:
@@ -148,7 +151,7 @@ services:
       - "8003:8000"
     volumes:
       - ./order-service:/app
-    command: ["./wait-for-it.sh", "order-db", "3306", "--", "python", "app/main.py"]
+    # command: ["./wait-for-it.sh", "order-db", "3306", "--", "python", "app/main.py"]
     # command: sh -c "./wait-for-it.sh order-db 3306 -- python app/main.py"
     networks:
       - backend

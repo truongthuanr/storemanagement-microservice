@@ -15,8 +15,13 @@ app.include_router(order_router.router)
 # def run_consumer():
 #     start_inventory_response_consumer()
 
-if __name__ == "__main__":
+
+def main():
     # Optional: start consumer thread
     # consumer_thread = threading.Thread(target=run_consumer, daemon=True)
     # consumer_thread.start()
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
+if __name__ == "__main__":
+    main()
+    
