@@ -35,12 +35,7 @@ services:
   inventory-service:
     build:
       context: ./inventory-service
-<<<<<<< Updated upstream
-    image: inventory-service:latest
-    # image: truongthuanr/inventory-service:latest
-=======
     image: truongthuanr/inventory-service:latest
->>>>>>> Stashed changes
     container_name: inventory-service
     restart: no
     depends_on:
@@ -57,12 +52,6 @@ services:
     ports:
       - "8001:8000"
       - "50051:50051"
-<<<<<<< Updated upstream
-    volumes:
-      - ./inventory-service:/app
-    # command: ["./wait-for-it.sh", "inventory-db", "3306", "--", "python", "app/main.py"]
-=======
->>>>>>> Stashed changes
     command: sh -c "./wait-for-it.sh inventory-db 3306 -- python app/main.py"
     networks:
       - backend
