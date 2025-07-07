@@ -35,8 +35,12 @@ services:
   inventory-service:
     build:
       context: ./inventory-service
+<<<<<<< Updated upstream
     image: inventory-service:latest
     # image: truongthuanr/inventory-service:latest
+=======
+    image: truongthuanr/inventory-service:latest
+>>>>>>> Stashed changes
     container_name: inventory-service
     restart: no
     depends_on:
@@ -53,9 +57,12 @@ services:
     ports:
       - "8001:8000"
       - "50051:50051"
+<<<<<<< Updated upstream
     volumes:
       - ./inventory-service:/app
     # command: ["./wait-for-it.sh", "inventory-db", "3306", "--", "python", "app/main.py"]
+=======
+>>>>>>> Stashed changes
     command: sh -c "./wait-for-it.sh inventory-db 3306 -- python app/main.py"
     networks:
       - backend
@@ -100,12 +107,62 @@ services:
       INVENTORY_GRPC_PORT: 50051
     ports:
       - "8002:8000"
+<<<<<<< Updated upstream
     volumes:
       - ./product-service:/app
     command: ["./wait-for-it.sh", "product-db", "3306", "--", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
     networks:
       - backend
 
+=======
+    networks:
+      - backend
+
+  order-db:
+    image: mysql:8.0
+    container_name: order-db
+    restart: no
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: order_db
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    ports:
+      - "3309:3306"
+    volumes:
+      - order-db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - backend
+
+  order-service:
+    build:
+      context: ./order-service
+    image: truongthuanr/order-service:latest
+    working_dir: /app
+    container_name: order-service
+    restart: no
+    depends_on:
+      - inventory-service
+    environment:
+      DB_HOST: order-db
+      DB_PORT: 3306
+      DB_NAME: order_db
+      DB_USER: user
+      DB_PASSWORD: password
+      DATABASE_URL: mysql+pymysql://user:password@order-db:3306/order_db
+      INVENTORY_GRPC_HOST: inventory-service
+      INVENTORY_GRPC_PORT: 50051
+    ports:
+      - "8003:8000"
+    networks:
+      - backend
+
+>>>>>>> Stashed changes
 volumes:
   inventory-db-data:
   product-db-data:

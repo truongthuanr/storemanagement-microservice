@@ -1,6 +1,8 @@
 # app/main.py
 import sys
 import os
+from database import Base, engine
+from app.models.inventory import *
 
 BASE_DIR = os.path.dirname(__file__)
 # Thêm thư mục 'proto/' vào sys.path
@@ -10,6 +12,8 @@ sys.path.append(PROTO_DIR)
 import asyncio
 from app.grpc.grpc_server import serve_grpc
 from app.events.consumer import consume
+
+Base.metadata.create_all(bind=engine)
 
 async def main():
     await asyncio.gather(
