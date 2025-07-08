@@ -4,6 +4,8 @@ from sqlalchemy.orm import Session
 from typing import List, Dict, Optional
 from app.crud import inventory_crud
 
+from app.servicelogging.servicelogger import logger
+
 
 # ---------- Helpers -------------------------------------------------
 def _to_dict(model) -> Dict:
@@ -11,6 +13,7 @@ def _to_dict(model) -> Dict:
         "id": model.id,
         "name": model.name,
         "description": model.description or "",
+        "product_id":model.product_id,
         "price": float(model.price),
         "stock": model.stock,
         "created_at": model.created_at,
@@ -28,9 +31,17 @@ def get_inventory(db: Session, inv_id: int) -> Optional[Dict]:
     return _to_dict(m) if m else None
 
 
-def create_inventory(db: Session, *, name: str, description: str, price: float, stock: int) -> Dict:
-    m = inventory_crud.create_inventory(db, name, description, price, stock)
-    return _to_dict(m)
+def create_inventory(db: Session, *, product_id: int, name: str, description: str, price: float, stock: int) -> Dict:
+    logger.info("Function Start!")
+    m = inventory_crud.create_inventory(db, product_id, name, description, price, stock)
+    result =  _to_dict(m)
+    
+    logger.info(
+        f"Return | "
+        f"product_id={product_id}, name={name}, price={price}, stock={stock}, id={result['id']}, description={description}"
+    )
+    
+    return result
 
 
 def update_inventory(db: Session, inv_id: int, **fields) -> Optional[Dict]:
