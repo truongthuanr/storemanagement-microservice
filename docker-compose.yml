@@ -96,17 +96,9 @@ services:
       INVENTORY_GRPC_PORT: 50051
     ports:
       - "8002:8000"
-<<<<<<< Updated upstream
-    volumes:
-      - ./product-service:/app
-    command: ["./wait-for-it.sh", "product-db", "3306", "--", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
     networks:
       - backend
-
-=======
-    networks:
-      - backend
-
+      
   order-db:
     image: mysql:8.0
     container_name: order-db
@@ -151,8 +143,8 @@ services:
     networks:
       - backend
 
->>>>>>> Stashed changes
 volumes:
+  order-db-data:
   inventory-db-data:
   product-db-data:
 
