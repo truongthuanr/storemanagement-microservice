@@ -96,6 +96,17 @@ class InventoryServiceImpl(inventory_pb2_grpc.InventoryServiceServicer):
         finally:
             db.close()
 
+    # --------- Get inventory by product-id ---------------------------
+    async def GetInventoryByProductId(self, request, context):
+        db = SessionLocal()
+        try:
+            total_stock = svc.get_stock_by_productid(db, request.product_id)
+        finally:
+            db.close()
+        return inventory_pb2.InventoryResponseByProductId(product_id=request.product_id,
+                                                          total_stock=total_stock)
+
+
 
 # ---------- Server bootstrap ----------------------------------------
 async def serve_grpc():
