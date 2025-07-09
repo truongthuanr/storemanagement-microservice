@@ -30,6 +30,8 @@ def get_inventory(db: Session, inv_id: int) -> Optional[Dict]:
     m = inventory_crud.get_inventory_by_id(db, inv_id)
     return _to_dict(m) if m else None
 
+def get_stock_by_productid(db: Session, product_id) -> int:
+    return inventory_crud.get_stock_by_productid(db, product_id)
 
 def create_inventory(db: Session, *, product_id: int, name: str, description: str, price: float, stock: int) -> Dict:
     logger.info("Function Start!")

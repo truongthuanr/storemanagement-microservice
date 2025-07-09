@@ -58,6 +58,11 @@ class InventoryServiceStub(object):
                 request_serializer=inventory__pb2.Empty.SerializeToString,
                 response_deserializer=inventory__pb2.InventoryList.FromString,
                 _registered_method=True)
+        self.GetInventoryByProductId = channel.unary_unary(
+                '/inventory.InventoryService/GetInventoryByProductId',
+                request_serializer=inventory__pb2.InventoryRequestByProductId.SerializeToString,
+                response_deserializer=inventory__pb2.InventoryResponseByProductId.FromString,
+                _registered_method=True)
 
 
 class InventoryServiceServicer(object):
@@ -91,6 +96,12 @@ class InventoryServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def GetInventoryByProductId(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_InventoryServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -113,6 +124,11 @@ def add_InventoryServiceServicer_to_server(servicer, server):
                     servicer.ListInventory,
                     request_deserializer=inventory__pb2.Empty.FromString,
                     response_serializer=inventory__pb2.InventoryList.SerializeToString,
+            ),
+            'GetInventoryByProductId': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetInventoryByProductId,
+                    request_deserializer=inventory__pb2.InventoryRequestByProductId.FromString,
+                    response_serializer=inventory__pb2.InventoryResponseByProductId.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -227,6 +243,33 @@ class InventoryService(object):
             '/inventory.InventoryService/ListInventory',
             inventory__pb2.Empty.SerializeToString,
             inventory__pb2.InventoryList.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetInventoryByProductId(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/inventory.InventoryService/GetInventoryByProductId',
+            inventory__pb2.InventoryRequestByProductId.SerializeToString,
+            inventory__pb2.InventoryResponseByProductId.FromString,
             options,
             channel_credentials,
             insecure,

@@ -3,12 +3,20 @@
 from sqlalchemy.orm import Session
 from app.models.inventory import Inventory
 from app.servicelogging.servicelogger import logger
+from sqlalchemy import func
 
 
 
 def get_inventory_by_id(db: Session, inventory_id: int) -> Inventory | None:
     return db.query(Inventory).filter(Inventory.id == inventory_id).first()
 
+def get_stock_by_productid(db: Session, product_id: int) -> int | None:
+    logger.info("Function Start!")
+    result = db.query(func.sum(Inventory.stock)) \
+                .filter(Inventory.product_id == product_id) \
+                .scalar()
+    logger.info(f"Total stock for product_id={product_id} is {type(result)}:{result}")
+    return int(result or 0)
 
 def get_all_inventory(db: Session) -> list[Inventory]:
     return db.query(Inventory).all()
