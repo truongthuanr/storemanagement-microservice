@@ -15,9 +15,10 @@ RUN apt-get update && apt-get install -y \
 COPY requirements.txt .
 
 RUN pip install --upgrade pip && pip install -r requirements.txt
+RUN pip install --no-cache-dir cryptography
 
 COPY . .
 
 EXPOSE 50051
 
-CMD ["python", "app/server.py"]
+CMD ["python", "app/main.py"]

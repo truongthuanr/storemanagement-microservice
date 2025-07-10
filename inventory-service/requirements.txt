@@ -13,3 +13,6 @@ python-dotenv==1.0.1
 pydantic_settings
 pymysql
 pydantic
+
+# RabbitMQ
+aio-pika==9.0.3

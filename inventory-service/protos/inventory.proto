@@ -12,30 +12,41 @@ message InventoryRequest {
   int32 inventory_id = 1;
 }
 
+message InventoryRequestByProductId {
+  int32 product_id = 1;
+}
+
 message InventoryUpdateRequest {
   int32 inventory_id = 1;
   int32 stock_change = 2;
 }
 
 message CreateInventoryRequest {
-  string name = 1;
-  string description = 2;
-  double price = 3;
-  int32 stock = 4;
-}
-
-message InventoryItem {
-  int32 id = 1;
+  int32 product_id = 1; 
   string name = 2;
   string description = 3;
   double price = 4;
   int32 stock = 5;
-  string created_at = 6;
-  string updated_at = 7;
+}
+
+message InventoryItem {
+  int32 id = 1;
+  int32 product_id = 2;
+  string name = 3;
+  string description = 4;
+  double price = 5;
+  int32 stock = 6;
+  string created_at = 7;
+  string updated_at = 8;
 }
 
 message InventoryResponse {
   InventoryItem item = 1;
+}
+
+message InventoryResponseByProductId {
+  int32 product_id = 1;
+  int32 total_stock = 2;
 }
 
 message UpdateInventoryResponse {
@@ -56,4 +67,5 @@ service InventoryService {
   rpc GetInventory(InventoryRequest) returns (InventoryResponse);
   rpc UpdateInventory(InventoryUpdateRequest) returns (UpdateInventoryResponse);
   rpc ListInventory(Empty) returns (InventoryList);
+  rpc GetInventoryByProductId(InventoryRequestByProductId) returns (InventoryResponseByProductId);
 }
