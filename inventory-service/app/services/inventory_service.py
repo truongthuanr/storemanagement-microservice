@@ -55,18 +55,25 @@ def delete_inventory(db: Session, inv_id: int) -> bool:
     return inventory_crud.delete_inventory(db, inv_id)
 
 
-# ---------- Domain logic used bởi Order -----------------------------
+# ---------- Domain logic used by Order -----------------------------
 def reserve_stock(db: Session, items: List[Dict]) -> bool:
     """
     items = [{"id": int, "quantity": int}, ...]
     Trả True nếu đủ hàng & đã trừ, False nếu thiếu.
     """
+    logger.info("Function start!")
     # 1. Kiểm tra đủ hàng
+    logger.info("Check each item")
     for it in items:
-        m = inventory_crud.get_inventory_by_id(db, it["id"])
-        if not m or m.stock < it["quantity"]:
+        m = inventory_crud.get_stock_by_productid(db, it["product_id"])
+        if not m or m < it["quantity"]:
+            logger.info(f"Insufficient stock for item_id={it['product_id']}: requested={it['quantity']}, available={m if m else 'None'}")
             return False
     # 2. Trừ kho
     for it in items:
-        inventory_crud.update_inventory(db, it["id"], stock=m.stock - it["quantity"])
+        m = inventory_crud.get_stock_by_productid(db, it["product_id"])
+        inventory_crud.update_inventory(db, it["product_id"], stock=m-it["quantity"])
+
+    logger.info("Stock check passed for all items.")
+
     return True
