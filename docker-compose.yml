@@ -35,7 +35,6 @@ services:
   inventory-service:
     build:
       context: ./inventory-service
-    # image: inventory-service:latest
     image: truongthuanr/inventory-service:latest
     container_name: inventory-service
     restart: no
@@ -53,9 +52,6 @@ services:
     ports:
       - "8001:8000"
       - "50051:50051"
-    # volumes:
-    #   - ./inventory-service:/app
-    # command: ["./wait-for-it.sh", "inventory-db", "3306", "--", "python", "app/main.py"]
     command: sh -c "./wait-for-it.sh inventory-db 3306 -- python app/main.py"
     networks:
       - backend
@@ -100,12 +96,9 @@ services:
       INVENTORY_GRPC_PORT: 50051
     ports:
       - "8002:8000"
-    # volumes:
-    #   - ./product-service:/app
-    command: ["./wait-for-it.sh", "product-db", "3306", "--", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
     networks:
       - backend
-
+      
   order-db:
     image: mysql:8.0
     container_name: order-db
@@ -147,11 +140,6 @@ services:
       INVENTORY_GRPC_PORT: 50051
     ports:
       - "8003:8000"
-    # volumes:
-    #   - ./order-service:/app
-    # command: ["./wait-for-it.sh", "order-db", "3306", "--", "python", "app/main.py"]
-    # command: sh -c "./app/wait-for-it.sh order-db 3306 -- python app/main.py"
-
     networks:
       - backend
 

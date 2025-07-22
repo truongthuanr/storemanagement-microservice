@@ -5,6 +5,8 @@ from concurrent.futures import ThreadPoolExecutor
 from app.proto import inventory_pb2, inventory_pb2_grpc
 from app.database import SessionLocal
 from app.services import inventory_service as svc
+from app.mappers.inventory_mapper import to_proto_item
+from servicelogging.servicelogger import logger
 
 
 class InventoryServiceImpl(inventory_pb2_grpc.InventoryServiceServicer):
@@ -35,18 +37,26 @@ class InventoryServiceImpl(inventory_pb2_grpc.InventoryServiceServicer):
 
     # ---------- Create ----------------------------------------------
     async def CreateInventory(self, request, context):
+        logger.info("CreateInventory Started")
         db = SessionLocal()
         try:
             d = svc.create_inventory(
                 db,
+                product_id=request.product_id, 
                 name=request.name,
                 description=request.description,
                 price=request.price,
                 stock=request.stock,
             )
-            return inventory_pb2.InventoryResponse(**d)
+            item = to_proto_item(d)
+            logger.info(
+                    f"CreateInventory return | "
+                    f"item ={item}"
+    )
+            return inventory_pb2.InventoryResponse(item=item)
         finally:
             db.close()
+
 
     # ---------- Update ----------------------------------------------
     async def UpdateInventory(self, request, context):
@@ -85,6 +95,17 @@ class InventoryServiceImpl(inventory_pb2_grpc.InventoryServiceServicer):
             return inventory_pb2.ReserveStockResponse(success=ok)
         finally:
             db.close()
+
+    # --------- Get inventory by product-id ---------------------------
+    async def GetInventoryByProductId(self, request, context):
+        db = SessionLocal()
+        try:
+            total_stock = svc.get_stock_by_productid(db, request.product_id)
+        finally:
+            db.close()
+        return inventory_pb2.InventoryResponseByProductId(product_id=request.product_id,
+                                                          total_stock=total_stock)
+
 
 
 # ---------- Server bootstrap ----------------------------------------
