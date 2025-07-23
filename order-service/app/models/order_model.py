@@ -16,7 +16,7 @@ class Order(Base):
     __tablename__ = "orders"
 
     id = Column(Integer, primary_key=True, index=True)
-    customer_id = Column(Integer, nullable=False)  # Giả sử bạn có user service
+    customer_id = Column(Integer, nullable=False)  # user service
     status = Column(Enum(OrderStatusEnum), default=OrderStatusEnum.pending)
     total_amount = Column(Float, default=0.0)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
