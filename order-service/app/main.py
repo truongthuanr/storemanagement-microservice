@@ -1,25 +1,22 @@
-import os
-import threading
+
 import uvicorn
 from fastapi import FastAPI
 from app.api import order_router
-# from app.consumers.inventory_consumer import start_inventory_response_consumer 
+from app.database import Base, engine  
+from contextlib import asynccontextmanager
+import aio_pika
+from app.consumers import handle_price_updated
+from app.consumers import lifespan
 
-app = FastAPI(title="Order Service")
+app = FastAPI(title="Order Service",lifespan=lifespan)
 
-# Include routers
+# Đăng ký route
 app.include_router(order_router.router)
 
-
-# Optional: Run consumer in background thread (nếu bạn muốn xử lý phản hồi từ inventory)
-# def run_consumer():
-#     start_inventory_response_consumer()
-
+# Tạo bảng DB
+Base.metadata.create_all(bind=engine)
 
 def main():
-    # Optional: start consumer thread
-    # consumer_thread = threading.Thread(target=run_consumer, daemon=True)
-    # consumer_thread.start()
     uvicorn.run(app, host="0.0.0.0", port=8000)
 
 if __name__ == "__main__":

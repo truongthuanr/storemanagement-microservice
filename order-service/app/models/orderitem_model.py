@@ -8,7 +8,7 @@ class OrderItem(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     order_id = Column(Integer, ForeignKey("orders.id", ondelete="CASCADE"), nullable=False)
-    inventory_id = Column(Integer, nullable=False)  # liên kết tới Inventory
+    product_id = Column(Integer, nullable=False)  # liên kết tới Inventory
     quantity = Column(Integer, nullable=False)
     price_per_unit = Column(Float, nullable=False)
     subtotal = Column(Float, nullable=False)  # quantity * price_per_unit
