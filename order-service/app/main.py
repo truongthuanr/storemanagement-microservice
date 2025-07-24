@@ -5,8 +5,7 @@ from app.api import order_router
 from app.database import Base, engine  
 from contextlib import asynccontextmanager
 import aio_pika
-from app.consumers import handle_price_updated
-from app.consumers import lifespan
+from app.brokers import lifespan
 
 app = FastAPI(title="Order Service",lifespan=lifespan)
 
