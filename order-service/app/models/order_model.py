@@ -6,6 +6,7 @@ import enum
 
 
 class OrderStatusEnum(str, enum.Enum):
+    init = 'init'
     pending = "pending"
     confirmed = "confirmed"
     cancelled = "cancelled"
