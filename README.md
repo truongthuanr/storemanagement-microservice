@@ -10,34 +10,36 @@
 
 ## 🧾 Overview
 
-**StoreManagement** là một hệ thống **microservice-based** được xây dựng bằng Python 3.10, FastAPI và gRPC, giúp quản lý toàn bộ hoạt động bán lẻ. Mỗi business domain (sản phẩm, tồn kho, đơn hàng...) được tách thành service riêng biệt để đảm bảo tính **modular**, **scalable** và **maintainable**.
+**StoreManagement** is a microservice-based system built with Python 3.10, FastAPI, and gRPC. Each business domain (products, inventory, orders...) is split into individual services to ensure **modularity**, **scalability**, and **ease of maintenance**.
 
-Hiện tại, hệ thống bao gồm:
+Current services include:
 
-| Microservice         | Chức năng chính                                               | Tech sử dụng                 |
-|----------------------|---------------------------------------------------------------|------------------------------|
-| `Product Service`    | CRUD sản phẩm, giao tiếp với Inventory thông qua gRPC         | FastAPI + gRPC client        |
-| `Inventory Service`  | Quản lý tồn kho, định giá sản phẩm, expose gRPC và REST API   | FastAPI + gRPC server        |
+| Microservice       | Description                                                                 | Technologies                |
+|--------------------|-----------------------------------------------------------------------------|-----------------------------|
+| `Product Service`  | CRUD product management; communicates with Inventory via gRPC               | FastAPI + gRPC client       |
+| `Inventory Service`| Stock management and pricing; exposes both REST and gRPC interfaces         | FastAPI + gRPC server       |
+| `Order Service`    | Order creation and tracking; async communication with Inventory via RabbitMQ| FastAPI + RabbitMQ (pub/sub)|
 
 ---
 
 ## ⚙️ Tech Stack
 
-| Layer               | Technology                                  |
-|---------------------|---------------------------------------------|
-| API Framework       | FastAPI                                     |
-| Interservice Comm.  | gRPC                                        |
-| Database ORM        | SQLAlchemy + MySQL                          |
-| Messaging (optional)| RabbitMQ                                    |
-| Containerization    | Docker, Docker Compose                      |
-| Codegen Tools       | grpcio-tools                                |
-| Dev Environments    | Linux / macOS / WSL                         |
+| Layer                | Technology                                  |
+|----------------------|---------------------------------------------|
+| API Framework        | FastAPI                                     |
+| Interservice Comm.   | gRPC (sync), RabbitMQ (async)               |
+| Database ORM         | SQLAlchemy + MySQL                          |
+| Messaging Queue      | RabbitMQ (aio-pika)                         |
+| Containerization     | Docker, Docker Compose                      |
+| Codegen Tools        | grpcio-tools                                |
+| Service Structure    | Layered: api / service / broker / crud / log|
+| Dev Environments     | Linux / Window / WSL                         |
 
 ---
 
 ## 🗂 Project Structure
 
-```bash
+```
 storemanagement-microservice/
 ├── docker-compose.yml
 ├── inventory-service/
@@ -82,53 +84,56 @@ docker-compose -f docker-compose.dev.yml up --build
 |--------------------|------------------------------|
 | Inventory Service  | http://localhost:8001        |
 | Product Service    | http://localhost:8002        |
+| Order Service      | http://localhost:8003        |
 
 ---
 
-## 🔌 gRPC Interservice Communication
+## 🔌 Interservice Communication
 
-- \`product-service\` acts as a gRPC **client** to \`inventory-service\`.
-- Protocol defined via \`inventory.proto\` và được biên dịch bằng \`grpcio-tools\`.
+- `product-service` acts as a **gRPC client** to `inventory-service`.
+- Protocols defined in `inventory.proto`, compiled via `grpcio-tools`.
 
-### Example:
-
-\`\`\`bash
+```bash
 python -m grpc_tools.protoc \
   -I=inventory-service/protos \
   --python_out=inventory-service/app/proto \
   --grpc_python_out=inventory-service/app/proto \
   inventory-service/protos/inventory.proto
-\`\`\`
+```
 
-- Các service giao tiếp với nhau qua tên container nội bộ (Docker network DNS).
+- `order-service` communicates with `inventory-service` via **RabbitMQ**:
+  - Publishes `order.created` events
+  - Listens to `inventory.response` for stock confirmation
+- All services communicate through internal Docker network using service names.
 
 ---
 
 ## 🚀 Future Roadmap
 
-Planned extensions include:
+Planned extensions:
 
-- [ ] **Order Service** – handle order placement and tracking  
-- [ ] **User Service** – manage authentication and authorization  
-- [ ] **Cart Service** – temporary cart storage per session  
-- [ ] **Notification Service** – for async email/SMS via RabbitMQ  
-- [ ] **API Gateway** – optional routing via FastAPI or Traefik
+- [x] **Order Service** – manage order creation & inventory reservation  
+- [ ] **User Service** – handle authentication and user accounts  
+- [ ] **Cart Service** – session-based cart before checkout  
+- [ ] **Notification Service** – async email/SMS using message queue  
+- [ ] **API Gateway** – optional routing layer (e.g., FastAPI or Traefik)
 
 ---
 
 ## 🧠 Key Concepts Applied
 
-- ✅ Clean architecture & domain-driven decomposition  
-- ✅ Async communication via gRPC  
-- ✅ Dockerized, isolated development per service  
-- ✅ Decoupled database per service  
-- ✅ RabbitMQ-ready for future event-driven flows  
+- ✅ Domain-based service decomposition  
+- ✅ gRPC for synchronous internal calls  
+- ✅ RabbitMQ for async workflows  
+- ✅ Clean code separation per service  
+- ✅ Fully dockerized dev environment  
+- ✅ Production-readiness in structure
 
 ---
 
 ## 🤝 Contributing
 
-PRs and suggestions are welcome. Feel free to fork and raise an issue if you encounter bugs or want to discuss improvements.
+Pull requests and suggestions are welcome. Feel free to fork and raise an issue for bugs or improvements.
 
 ---
 
