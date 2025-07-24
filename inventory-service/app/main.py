@@ -11,21 +11,20 @@ sys.path.append(PROTO_DIR)
 
 import asyncio
 from app.grpc.grpc_server import serve_grpc
-from app.events.consumer import consume
+from app.broker.consumer import consume
 
 Base.metadata.create_all(bind=engine)
 
 async def main():
-    await asyncio.gather(
-        serve_grpc(),   # chạy gRPC server
-        consume()       # chạy RabbitMQ consumer
-    )
+    consumer_task = asyncio.create_task(consume())
+    grpc_task = asyncio.create_task(serve_grpc())
+    
+    # Wait for both to finish (hoặc bất kỳ cái nào raise exception)
+    await asyncio.gather(grpc_task, consumer_task)
 
 if __name__ == "__main__":
-    print("Starting Inventory Service...",flush=True)  # Thông báo bắt đầu chạy app
+    print("🚀 Starting Inventory Service...", flush=True)
     try:
         asyncio.run(main())
     except Exception as e:
-        print(f"Error running Inventory Service: {e}",flush=True)
-    else:
-        print("Inventory Service exited cleanly.",flush=True)
+        print(f"❌ Error: {e}", flush=True)
