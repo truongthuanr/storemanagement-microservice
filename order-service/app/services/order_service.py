@@ -1,73 +1,81 @@
 from sqlalchemy.orm import Session
 from app import crud, schemas
+from uuid import uuid4
 from app.models import Order, OrderItem, OrderCreate, OrderStatusEnum
 # from app.producers.inventory_producer import send_inventory_update
 from app.exceptions import OrderValidationError, ProductUnavailable
 from datetime import datetime, timezone
 from app.brokers import publish_order_created
 from app.servicelogging import logger
+
 # Message format
 # {
-#   "event": "order.created",
-#   "timestamp": "2025-07-23T21:15:30Z",
-#   "order_id": "ord_123456",
-#   "customer_id": "cus_7890",
-#   "items": [
-#     {
-#       "product_id": 101,
-#       "quantity": 2
-#     },
-#     {
-#       "product_id": 202,
-#       "quantity": 1
-#     }
-#   ]
+# "event": "order.created",
+# "timestamp": "2025-07-18T14:00:00Z",
+# "correlation_id": "abc123-xyz789",
+# "producer": "order-service",
+# "data": {
+#     "order_id": "order_001",
+#     "user_id": 123,
+#     "items": [
+#     { "product_id": 1, "quantity": 2 },
+#     { "product_id": 2, "quantity": 1 }
+#     ]
 # }
-async def create_order_service(payload: OrderCreate, db: Session) -> dict:
-    logger.info(f"Create order start!")
+# }
+async def create_order_service(request: Request, payload: OrderCreate, db: Session) -> dict:
+    logger.info(f"Start create_order_service for customer_id={payload.customer_id} with {len(payload.items)} items.")
+
     if not payload.items:
         raise OrderValidationError("Order must contain at least one item")
 
     # Step 1: Create Order with status init
     order = Order(
         customer_id=payload.customer_id,
-        status=OrderStatusEnum.init.value,  # trạng thái khởi tạo
-        created_at=datetime.now()
+        status=OrderStatusEnum.init.value,
+        created_at=datetime.now(timezone.utc)
     )
     db.add(order)
-    db.flush()  # để lấy order.id
-    logger.info(f"Order created with order_id={order.id}")
+    db.flush()
+    logger.info(f"Created order with id={order.id}, status={order.status}")
 
-    # Step 2: Ghi OrderItem ở trạng thái "chờ giá"
+    # Step 2: Ghi OrderItems
     for item in payload.items:
         db_item = OrderItem(
             order_id=order.id,
             product_id=item.product_id,
             quantity=item.quantity,
-            price_per_unit=None  # sẽ cập nhật sau khi nhận từ inventory
+            price_per_unit=None
         )
         db.add(db_item)
-
     db.commit()
+    logger.info(f"Committed order and items to DB for order_id={order.id}")
 
-    # Step 3: Gửi message tới Inventory để reserve + lấy giá
+    # Step 3: Tạo message và gửi
+    correlation_id = str(uuid4())
     message = {
         "event": "order.created",
-        "timestamp": datetime.now(timezone.utc).isoformat() + "Z",
-        "order_id": order.id,
-        "customer_id": payload.customer_id,
-        "items": [
-            {"product_id": item.product_id, "quantity": item.quantity}
-            for item in payload.items
-        ]
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "correlation_id": correlation_id,
+        "producer": "order-service",
+        "data": {
+            "order_id": str(order.id),
+            "user_id": payload.customer_id,
+            "items": [
+                {"product_id": item.product_id, "quantity": item.quantity}
+                for item in payload.items
+            ]
+        }
     }
-    logger.info(f"Message created: {message}")
-    await publish_order_created(message)
 
-    logger.info(f"Successfully create order order_id={order.id}, status={order.status}")
+    logger.info(f"Publishing order.created message for order_id={order.id}, correlation_id={correlation_id}")
+    await publish_order_created(request.app, message)
+    logger.info(f"Message published successfully for order_id={order.id}")
+
     return {
         "order_id": order.id,
-        "status": order.status
+        "status": order.status,
+        "correlation_id": correlation_id
     }
 
 
