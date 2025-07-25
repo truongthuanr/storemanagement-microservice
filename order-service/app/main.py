@@ -2,10 +2,19 @@
 import uvicorn
 from fastapi import FastAPI
 from app.api import order_router
-from app.database import Base, engine  
+from app.database.database import Base, engine  
 from contextlib import asynccontextmanager
 import aio_pika
+<<<<<<< Updated upstream
 from app.brokers import lifespan
+=======
+<<<<<<< Updated upstream
+from app.consumers import handle_price_updated
+from app.consumers import lifespan
+=======
+from app.brokers.rabbitmq import lifespan
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
 
 app = FastAPI(title="Order Service",lifespan=lifespan)
 

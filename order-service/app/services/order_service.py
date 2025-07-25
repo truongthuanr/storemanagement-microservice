@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+<<<<<<< Updated upstream
 from app import crud, schemas
 from uuid import uuid4
 from app.models import Order, OrderItem, OrderCreate, OrderStatusEnum
@@ -7,7 +8,25 @@ from app.exceptions import OrderValidationError, ProductUnavailable
 from datetime import datetime, timezone
 from app.brokers import publish_order_created
 from app.servicelogging import logger
+<<<<<<< Updated upstream
 
+=======
+=======
+from uuid import uuid4
+from datetime import datetime, timezone
+from fastapi import Request
+
+
+from app import crud, schemas
+from app.models.order_model import Order, OrderStatusEnum
+from app.models.orderitem_model import OrderItem
+from app.schemas.order_schema import OrderCreate
+from app.exceptions.order_exception import OrderValidationError, ProductUnavailable
+from app.brokers.publish_order_created import publish_order_created
+from app.servicelogging.servicelogger import logger
+
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
 # Message format
 # {
 # "event": "order.created",
