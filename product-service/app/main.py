@@ -14,3 +14,10 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 app.include_router(product_router, prefix="/api")
+
+
+# TODO: Refactor InventoryClient usage
+# - [ ] Chuyển sang sử dụng FastAPI lifespan để quản lý vòng đời của async InventoryClient
+# - [ ] Khởi tạo client trong app startup
+# - [ ] Đóng channel trong app shutdown
+# - [ ] Truy cập client qua request.app.state trong các route
