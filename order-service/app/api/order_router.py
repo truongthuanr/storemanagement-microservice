@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session
 from typing import List
 from datetime import datetime
@@ -8,9 +8,9 @@ from app.crud import order_crud
 from app.schemas.order_schema import (
     OrderCreate, OrderRead, OrderStatusUpdate, OrderStatusEnum
 )
-from app.exceptions import OrderValidationError, ProductUnavailable
-from app.services import create_order_service
-from app.servicelogging import logger
+from app.exceptions.order_exception import OrderValidationError, ProductUnavailable
+from app.services.order_service import create_order_service
+from app.servicelogging.servicelogger import logger
 
 router = APIRouter(
     prefix="/orders",
@@ -51,14 +51,14 @@ def delete_order(order_id: int, db: Session = Depends(get_db)):
     return
 
 @router.post("/create_order", status_code=201)
-async def create_order(payload: OrderCreate, db: Session = Depends(get_db)):
+async def create_order(request: Request, payload: OrderCreate, db: Session = Depends(get_db)):
     logger.info(f"Received create_order request from customer_id={payload.customer_id} with items={payload.items}")
     
     if not payload.items:
         raise HTTPException(status_code=400, detail="Order must contain items")
 
     try:
-        result = await create_order_service(payload, db)
+        result = await create_order_service(request, payload, db)
         logger.info(f"Successfully created order: {result}")
         return result
 
