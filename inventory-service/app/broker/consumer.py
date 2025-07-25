@@ -6,7 +6,7 @@ from app.database import SessionLocal
 from app.services import inventory_service as svc
 from app.broker.publisher import publish_event
 from app.broker.rabbitmq import get_connection, get_channel
-from app.broker import _handle_order_created
+from app.broker.order_create_consumer import _handle_order_created
 from app.servicelogging.servicelogger import logger
 
 
