@@ -7,7 +7,7 @@ from app.broker.publisher import publish_event
 from aio_pika import ExchangeType
 
 from app.servicelogging.servicelogger import logger
-from app.schemas import InventoryResponseMessage, InventoryItemResult
+from app.schemas.inventory_response import InventoryResponseMessage, InventoryItemResult
 
 # format request message:
 # {

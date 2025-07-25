@@ -2,7 +2,7 @@
 import aio_pika
 import json
 from app.broker.rabbitmq import get_channel
-from app.servicelogging import logger
+from app.servicelogging.servicelogger import logger
 
 async def publish_event(routing_key: str, message: dict):
     """

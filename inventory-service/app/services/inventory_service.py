@@ -10,7 +10,7 @@ from app.database import SessionLocal
 from app.crud import inventory_crud
 from app.servicelogging.servicelogger import logger
 from app.schemas.inventory_response import InventoryResponseMessage, InventoryItemResult
-from app.broker import publish_event
+from app.broker.publisher import publish_event
 
 
 # ---------- Helpers -------------------------------------------------
