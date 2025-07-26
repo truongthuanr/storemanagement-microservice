@@ -11,7 +11,7 @@ def setup_logger(name: str = "order-service") -> logging.Logger:
             "[%(asctime)s] [%(levelname)s] | %(module)s.%(funcName)s - %(message)s",
             datefmt="%Y-%m-%d %H:%M:%S"
         )
-        console_handler = logging.StreamHandler()
+        console_handler = logging.StreamHandler(sys.stdout)
         console_handler.setFormatter(formatter)
         console_handler.flush = sys.stdout.flush
 
