@@ -136,6 +136,7 @@ services:
       DB_USER: user
       DB_PASSWORD: password
       DATABASE_URL: mysql+pymysql://user:password@order-db:3306/order_db
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq/
       INVENTORY_GRPC_HOST: inventory-service
       INVENTORY_GRPC_PORT: 50051
     ports:

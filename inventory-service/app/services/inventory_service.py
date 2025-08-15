@@ -2,9 +2,15 @@
 from __future__ import annotations
 from sqlalchemy.orm import Session
 from typing import List, Dict, Optional
-from app.crud import inventory_crud
+from datetime import datetime, timezone
+from sqlalchemy.orm import sessionmaker, declarative_base, Session
 
+
+from app.database import SessionLocal
+from app.crud import inventory_crud
 from app.servicelogging.servicelogger import logger
+from app.schemas.inventory_response import InventoryResponseMessage, InventoryItemResult
+from app.broker.publisher import publish_event
 
 
 # ---------- Helpers -------------------------------------------------
@@ -77,3 +83,26 @@ def reserve_stock(db: Session, items: List[Dict]) -> bool:
     logger.info("Stock check passed for all items.")
 
     return True
+
+async def handle_order_created(payload: dict, correlation_id: str):
+    order_id = payload["order_id"]
+    items = payload["items"]
+
+    db = SessionLocal()
+    try:
+        ok, reserved_items, reason = reserve_stock(db, items)
+    finally:
+        db.close()
+
+    msg = InventoryResponseMessage(
+        event="inventory.response",
+        timestamp=datetime.now(timezone.utc),
+        correlation_id=correlation_id,
+        producer="inventory-service",
+        order_id=order_id,
+        status="reserved" if ok else "failed",
+        items=[InventoryItemResult(**item) for item in reserved_items],
+        reason=reason
+    )
+
+    await publish_event("inventory.response", msg.model_dump())

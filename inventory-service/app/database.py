@@ -13,7 +13,6 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 # Base để dùng cho các ORM model
 Base = declarative_base()
 
-# Dependency cho FastAPI
 def get_db() -> Session:
     db = SessionLocal()
     try:
