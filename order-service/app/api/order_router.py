@@ -9,13 +9,19 @@ from app.schemas.order_schema import (
     OrderCreate, OrderRead, OrderStatusUpdate, OrderStatusEnum
 )
 from app.exceptions.order_exception import OrderValidationError, ProductUnavailable
-from app.services.order_service import create_order_service
+# from app.services.order_service import create_order_service
 from app.servicelogging.servicelogger import logger
+from app.services.publisher_adapter import PublisherAdapter
+from app.services.order_service import OrderService
 
 router = APIRouter(
     prefix="/orders",
     tags=["Orders"]
 )
+
+def get_order_service(request: Request) -> OrderService:
+    publisher = PublisherAdapter(request.app)
+    return OrderService(publisher=publisher)
 
 @router.post("/", response_model=OrderRead, status_code=status.HTTP_201_CREATED)
 def create_order(order: OrderCreate, db: Session = Depends(get_db)):
@@ -51,24 +57,21 @@ def delete_order(order_id: int, db: Session = Depends(get_db)):
     return
 
 @router.post("/create_order", status_code=201)
-async def create_order(request: Request, payload: OrderCreate, db: Session = Depends(get_db)):
+async def create_order(
+    payload: OrderCreate,
+    db: Session = Depends(get_db),
+    service: OrderService = Depends(get_order_service)
+):
     logger.info(f"Received create_order request from customer_id={payload.customer_id} with items={payload.items}")
-    
-    if not payload.items:
-        raise HTTPException(status_code=400, detail="Order must contain items")
 
     try:
-        result = await create_order_service(request, payload, db)
+        result = await service.create_order(db, payload)
         logger.info(f"Successfully created order: {result}")
         return result
 
-    except OrderValidationError as e:
-        logger.warning(f"Validation error: {str(e)}")
-        raise HTTPException(status_code=400, detail=str(e))
-
-    except ProductUnavailable as e:
-        logger.error(f"Inventory error: {str(e)}")
-        raise HTTPException(status_code=502, detail=str(e))
+    except (OrderValidationError, ProductUnavailable) as e:
+        logger.warning(f"Business error: {str(e)}")
+        raise HTTPException(status_code=400 if isinstance(e, OrderValidationError) else 502, detail=str(e))
 
     except Exception as e:
         logger.exception("Unexpected error while creating order")
