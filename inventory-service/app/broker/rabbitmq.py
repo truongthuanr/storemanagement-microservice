@@ -16,4 +16,5 @@ async def get_channel():
     if not _channel or _channel.is_closed:
         conn = await get_connection()
         _channel = await conn.channel()
+        await _channel.set_qos(prefetch_count=20)
     return _channel
