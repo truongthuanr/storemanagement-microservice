@@ -10,7 +10,7 @@ async def lifespan(app):
     rabbitmq_url = get_rabbitmq_url()
     connection = await aio_pika.connect_robust(rabbitmq_url)
     channel = await connection.channel()
-    exchange = await channel.declare_exchange("order.events", durable=True)
+    exchange = await channel.declare_exchange("order.exchange", aio_pika.ExchangeType.DIRECT, durable=True)
 
     app.state.rabbitmq_channel = channel
     app.state.rabbitmq_exchange = exchange
