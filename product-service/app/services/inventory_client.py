@@ -1,32 +1,27 @@
-import grpc
+import grpc.aio
 from app.proto import inventory_pb2, inventory_pb2_grpc
 
 class InventoryClient:
     def __init__(self, host="inventory-service", port=50051):
-        self.channel = grpc.insecure_channel(f"{host}:{port}")
+        self.channel = grpc.aio.insecure_channel(f"{host}:{port}")
         self.stub = inventory_pb2_grpc.InventoryServiceStub(self.channel)
 
-    def get_inventory(self, product_id: int):
-        # request theo protobuf model
-        request = inventory_pb2.ProductRequest(id=product_id)
-        response = self.stub.GetInventory(request)
+    async def get_inventory(self, product_id: int):
+        request = inventory_pb2.InventoryRequestByProductId(product_id=product_id)
+        response = await self.stub.GetInventoryByProductId(request)
         return {
-            "id": response.id,
-            "name": response.name,
-            "description": response.description,
-            "price": float(response.price),
-            "stock": response.stock
+            "product_id": response.product_id,
+            "total_stock": response.total_stock
         }
 
-    def update_inventory(self, product_id: int, new_stock: int):
-        # tạo ProductUpdateRequest theo protobuf model
+    async def update_inventory(self, product_id: int, new_stock: int):
         product = inventory_pb2.Product(
             id=product_id,
             stock=new_stock,
-            # nếu các trường khác cần update thì thêm ở đây
+            # TODO: bổ sung thêm trường nếu cần update
         )
         request = inventory_pb2.ProductUpdateRequest(product=product)
-        response = self.stub.UpdateInventory(request)
+        response = await self.stub.UpdateInventory(request)
         return {
             "id": response.product.id,
             "name": response.product.name,
@@ -34,3 +29,6 @@ class InventoryClient:
             "price": float(response.product.price),
             "stock": response.product.stock
         }
+
+    async def close(self):
+        await self.channel.close()

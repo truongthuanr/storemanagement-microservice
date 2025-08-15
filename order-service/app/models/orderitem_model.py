@@ -10,7 +10,8 @@ class OrderItem(Base):
     order_id = Column(Integer, ForeignKey("orders.id", ondelete="CASCADE"), nullable=False)
     product_id = Column(Integer, nullable=False)  # liên kết tới Inventory
     quantity = Column(Integer, nullable=False)
-    price_per_unit = Column(Float, nullable=False)
-    subtotal = Column(Float, nullable=False)  # quantity * price_per_unit
+    price_per_unit = Column(Float, nullable=True)  # Có thể null trước khi cập nhật giá
+    subtotal = Column(Float, nullable=True)        # quantity * price_per_unit, cũng có thể null
 
     order = relationship("Order", back_populates="items")
+

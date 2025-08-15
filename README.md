@@ -1,84 +1,98 @@
-# StoreManagement Microservices
+# 🏬 StoreManagement Microservices
 
-[![Python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-High%20Performance-green.svg)](https://fastapi.tiangolo.com/)
-[![gRPC](https://img.shields.io/badge/gRPC-RPC-yellowgreen.svg)](https://grpc.io/)
-
-## Overview
-
-**StoreManagement** is a microservice-based system designed to manage retail operations. Each core business function is separated into its own FastAPI-based service, ensuring modularity, scalability, and ease of maintenance.
-
-### Current Services
-
-- **Inventory Service**: Manages stock levels and pricing, provides both REST API and gRPC interface.
-- **Product Service**: Manages product information and communicates with the Inventory Service via gRPC.
+[![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://www.python.org/)  
+[![FastAPI](https://img.shields.io/badge/FastAPI-Modern%20Python%20Web%20Framework-green.svg)](https://fastapi.tiangolo.com/)  
+[![gRPC](https://img.shields.io/badge/gRPC-Interservice%20Communication-yellowgreen.svg)](https://grpc.io/)  
+[![Docker](https://img.shields.io/badge/Docker-Containerized-blue.svg)](https://www.docker.com/)  
+[![RabbitMQ](https://img.shields.io/badge/RabbitMQ-Message%20Broker-orange.svg)](https://www.rabbitmq.com/)
 
 ---
 
-## Project Structure 
+## 🧾 Overview
+
+**StoreManagement** is a microservice-based system built with Python 3.10, FastAPI, and gRPC. Each business domain (products, inventory, orders...) is split into individual services to ensure **modularity**, **scalability**, and **ease of maintenance**.
+
+Current services include:
+
+| Microservice       | Description                                                                 | Technologies                |
+|--------------------|-----------------------------------------------------------------------------|-----------------------------|
+| `Product Service`  | CRUD product management; communicates with Inventory via gRPC               | FastAPI + gRPC client       |
+| `Inventory Service`| Stock management and pricing; exposes both REST and gRPC interfaces         | FastAPI + gRPC server       |
+| `Order Service`    | Order creation and tracking; async communication with Inventory via RabbitMQ| FastAPI + RabbitMQ (pub/sub)|
+
+---
+
+## ⚙️ Tech Stack
+
+| Layer                | Technology                                  |
+|----------------------|---------------------------------------------|
+| API Framework        | FastAPI                                     |
+| Interservice Comm.   | gRPC (sync), RabbitMQ (async)               |
+| Database ORM         | SQLAlchemy + MySQL                          |
+| Messaging Queue      | RabbitMQ (aio-pika)                         |
+| Containerization     | Docker, Docker Compose                      |
+| Codegen Tools        | grpcio-tools                                |
+| Service Structure    | Layered: api / service / broker / crud / log|
+| Dev Environments     | Linux / Window / WSL                         |
+
+---
+
+## 🗂 Project Structure
+
 ```
 storemanagement-microservice/
+├── docker-compose.yml
 ├── inventory-service/
-│ ├── app/
-│ │ ├── api/ # (Optional) REST API routes
-│ │ ├── proto/ # gRPC definitions and generated code
-│ │ ├── services/ # gRPC server logic
-│ │ ├── db/ # SQLAlchemy models and DB setup
-│ │ └── main.py # Application entrypoint
-│ ├── Dockerfile
-│ └── requirements.txt
-│
+│   ├── Dockerfile
+│   ├── app/
+│   │   ├──...
+│   └── requirements.txt
+├── order-service/
+│   ├── Dockerfile
+│   ├── app/
+│   │   ├──...
+│   └── requirements.txt
 ├── product-service/
-│ ├── app/
-│ │ ├── api/ # REST API routes for product management
-│ │ ├── proto/ # Compiled gRPC client for Inventory Service
-│ │ ├── services/ # Business logic + gRPC client
-│ │ ├── db/ # SQLAlchemy models and DB connection
-│ │ └── main.py # Application entrypoint
-│ ├── Dockerfile
-│ └── requirements.txt
-│
-├── docker-compose.dev.yml # Docker Compose for development
-├── docker-compose.prod.yml # Docker Compose for production
+│   ├── Dockerfile
+│   ├── app/
+│   │   ├──...
+│   └── requirements.txt
 └── README.md
-
 ```
-
-
 
 ---
 
-## Prerequisites
+## ▶️ Run Locally with Docker
+
+### Prerequisites
 
 - Python 3.10+
 - Docker & Docker Compose
-- MySQL 8.0 (runs in a container via Compose)
+- (Optional) Make or bash
 
----
-
-## Run the Project (Development)
+### Start all services
 
 ```bash
-git clone -b productservice-dev https://github.com/truongthuanr/storemanagement-microservice.git
+git clone https://github.com/truongthuanr/storemanagement-microservice.git
 cd storemanagement-microservice
 docker-compose -f docker-compose.dev.yml up --build
 ```
 
-#### Service endpoints:
+### Service Endpoints
 
-- Inventory Service: http://localhost:8001
+| Service            | Endpoint                     |
+|--------------------|------------------------------|
+| Inventory Service  | http://localhost:8001        |
+| Product Service    | http://localhost:8002        |
+| Order Service      | http://localhost:8003        |
 
-- Product Service: http://localhost:8002
+---
 
-## gRPC Communication
+## 🔌 Interservice Communication
 
-- Product Service acts as a gRPC client to communicate with Inventory Service.
+- `product-service` acts as a **gRPC client** to `inventory-service`.
+- Protocols defined in `inventory.proto`, compiled via `grpcio-tools`.
 
-- Communication is done via defined .proto interfaces (compiled using grpcio-tools).
-
-- All internal services can resolve each other by container name (Docker network).
-
-Example usage:
 ```bash
 python -m grpc_tools.protoc \
   -I=inventory-service/protos \
@@ -86,97 +100,51 @@ python -m grpc_tools.protoc \
   --grpc_python_out=inventory-service/app/proto \
   inventory-service/protos/inventory.proto
 ```
-Technologies Used
-| Feature           | Technology                               |
-| ----------------- | ---------------------------------------- |
-| API Framework     | [FastAPI](https://fastapi.tiangolo.com/) |
-| RPC Communication | [gRPC](https://grpc.io/)                 |
-| Database          | MySQL + SQLAlchemy ORM                   |
-| Containerization  | Docker + Docker Compose                  |
-| Code Generation   | grpcio-tools                             |
-| Dev Environment   | Linux / WSL / Docker Desktop             |
 
+- `order-service` communicates with `inventory-service` via **RabbitMQ**:
+  - Publishes `order.created` events
+  - Listens to `inventory.response` for stock confirmation
+- All services communicate through internal Docker network using service names.
 
-## Contact
+---
 
-For questions or collaboration, feel free to open an issue or submit a pull request on GitHub.
+## 🚀 Future Roadmap
 
+Planned extensions:
 
+- [x] **Order Service** – manage order creation & inventory reservation  
+- [ ] **User Service** – handle authentication and user accounts  
+- [ ] **Cart Service** – session-based cart before checkout  
+- [ ] **Notification Service** – async email/SMS using message queue  
+- [ ] **API Gateway** – optional routing layer (e.g., FastAPI or Traefik)
 
-##
-# **Draft**
-# storemanagement-microservice
+---
 
-## Microservice
+## 🧠 Key Concepts Applied
 
-### Inventory Service
-```
-online-shopping/
-│
-|-- gateway-service/       # Xử lý request từ client, định tuyến đến các service
-|-- inventory-service/     # 📦 Service quản lý hàng tồn kho
-│   |-- app/
-│   │   |-- api/           # FastAPI route handlers
-│   │   |-- models/        # SQLAlchemy models
-│   │   |-- crud/          # Repository (DB logic)
-│   │   |-- schemas/       # Pydantic schemas
-│   │   |-- main.py        # App entry point
-│   |-- Dockerfile
-│   |-- requirements.txt
-|-- docker-compose.yml
-|-- mysql/                 # Volume data của MySQL cho inventory
+- ✅ Domain-based service decomposition  
+- ✅ gRPC for synchronous internal calls  
+- ✅ RabbitMQ for async workflows  
+- ✅ Clean code separation per service  
+- ✅ Fully dockerized dev environment  
+- ✅ Production-readiness in structure
 
+---
 
-```
+## 🤝 Contributing
 
+Pull requests and suggestions are welcome. Feel free to fork and raise an issue for bugs or improvements.
 
+---
 
+## 📫 Contact
 
+Maintained by **Nguyễn Trường Thuận**  
+GitHub: https://github.com/truongthuanr  
+Email: truongthuanr@gmail.com
 
+---
 
-draft
-1. Phân tách các thành phần (Domain Decomposition)
-Dựa vào chức năng, bạn có thể chia dự án thành các service như sau:
+## 📝 License
 
-Microservice	Chức năng
-User Service	Đăng ký, đăng nhập, phân quyền (Auth)
-Product Service	Quản lý sản phẩm, danh mục
-Cart Service	Giỏ hàng
-Order Service	Đặt hàng, theo dõi đơn hàng
-Payment Service	Xử lý thanh toán
-Review Service	Đánh giá, nhận xét sản phẩm
-Notification Service (tùy chọn)	Gửi email, thông báo
-
-2. Kiến trúc giao tiếp
-Sử dụng FastAPI cho từng service (có thể triển khai độc lập).
-
-Giao tiếp giữa các service có thể dùng:
-
-HTTP REST API (đơn giản)
-
-Message Queue như RabbitMQ / Redis Streams (cho các task bất đồng bộ).
-
-3. Shared resources
-Cơ sở dữ liệu tách biệt cho mỗi service (nên là best practice).
-
-Redis / Celery: Xử lý task nền như gửi email, đồng bộ hóa.
-
-API Gateway: Một entrypoint duy nhất (ví dụ: dùng FastAPI hoặc Traefik / NGINX).
-
-4. Công cụ triển khai
-Docker: Container hóa từng service.
-
-Docker Compose: Quản lý nhiều service cùng lúc khi phát triển local.
-
-Kubernetes: Cho triển khai production ở quy mô lớn.
-
-5. Bắt đầu từng bước
-Tách service User ra trước (Auth + JWT)
-
-Tách Product Service
-
-Tạo API Gateway hoặc route thông qua frontend
-
-Dùng Docker Compose để test service phối hợp với nhau
-
-Triển khai Celery + Redis nếu cần task nền
+MIT License © 2025

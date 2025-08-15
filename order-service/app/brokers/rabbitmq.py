@@ -1,3 +1,4 @@
+# brokers/rabbitmq.py
 import os
 from contextlib import asynccontextmanager
 import aio_pika
@@ -6,7 +7,8 @@ import aio_pika
 
 @asynccontextmanager
 async def lifespan(app):
-    connection = await aio_pika.connect_robust("amqp://guest:guest@localhost/")
+    rabbitmq_url = get_rabbitmq_url()
+    connection = await aio_pika.connect_robust(rabbitmq_url)
     channel = await connection.channel()
     exchange = await channel.declare_exchange("order.events", durable=True)
 
