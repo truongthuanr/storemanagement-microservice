@@ -58,3 +58,20 @@ def delete_order(db: Session, order_id: int) -> bool:
 
 def get_all_orders(db: Session, skip: int = 0, limit: int = 100) -> List[Order]:
     return db.query(Order).offset(skip).limit(limit).all()
+
+
+def set_order_status(db: Session, order_id: int, success: bool, reason: str = None):
+    """
+    Update only the order status.
+    """
+    order = get_order(db, order_id)
+    if not order:
+        return None
+
+    if success:
+        order.status = OrderStatusEnum.confirmed.value
+    else:
+        order.status = OrderStatusEnum.cancelled.value
+
+    db.add(order)
+    return order

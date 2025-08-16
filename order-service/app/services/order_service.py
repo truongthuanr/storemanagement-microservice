@@ -5,11 +5,13 @@ from fastapi import Request
 
 
 from app import crud, schemas
+from app.database.database import SessionLocal
+from app.crud import order_crud, orderitem_crud
 from app.models.order_model import Order, OrderStatusEnum
 from app.models.orderitem_model import OrderItem
 from app.schemas.order_schema import OrderCreate
 from app.exceptions.order_exception import OrderValidationError, ProductUnavailable
-from app.brokers.publish_order_created import publish_order_created
+
 from app.servicelogging.servicelogger import logger
 
 # Message format
@@ -86,6 +88,37 @@ class OrderService:
             "status": order.status,
             "correlation_id": correlation_id
         }
+    
+    async def handle_stock_reserved_updated(self, message):
+        async with message.process():
+            try:
+                payload = json.loads(message.body)
+                data = payload.get("data", {})
+
+                order_id = int(data["order_id"])
+                success = data.get("success", False)
+                reserved_items = data.get("reserved_items", [])
+                reason = data.get("reason")
+
+                with SessionLocal() as db:   # session per message
+                    try:
+                        order = order_crud.set_order_status(db, order_id, success, reason)
+                        if order and success and reserved_items:
+                            orderitem_crud.update_reserved_items(db, order_id, reserved_items)
+                        db.commit()
+                    except:
+                        db.rollback()
+                        raise
+                    if not order:
+                        logger.warning(f"[Consumer] Order {order_id} not found")
+                    elif success:
+                        logger.info(f"[Consumer] Order {order_id} confirmed")
+                    else:
+                        logger.info(f"[Consumer] Order {order_id} cancelled, reason={reason}")
+
+            except Exception as e:
+                logger.exception(f"❌ Failed to process inventory_reserved: {e}")
+                raise
 
     def get_order(self, db: Session, order_id: int):
         return crud.order.get_order(db, order_id)
