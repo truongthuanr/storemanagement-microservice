@@ -3,7 +3,7 @@
 import grpc
 import warnings
 
-import inventory_pb2 as inventory__pb2
+from app.proto import inventory_pb2 as app_dot_proto_dot_inventory__pb2
 
 GRPC_GENERATED_VERSION = '1.71.0'
 GRPC_VERSION = grpc.__version__
@@ -18,7 +18,7 @@ except ImportError:
 if _version_not_supported:
     raise RuntimeError(
         f'The grpc package installed is at version {GRPC_VERSION},'
-        + f' but the generated code in inventory_pb2_grpc.py depends on'
+        + f' but the generated code in app/proto/inventory_pb2_grpc.py depends on'
         + f' grpcio>={GRPC_GENERATED_VERSION}.'
         + f' Please upgrade your grpc module to grpcio>={GRPC_GENERATED_VERSION}'
         + f' or downgrade your generated code using grpcio-tools<={GRPC_VERSION}.'
@@ -40,28 +40,28 @@ class InventoryServiceStub(object):
         """
         self.CreateInventory = channel.unary_unary(
                 '/inventory.InventoryService/CreateInventory',
-                request_serializer=inventory__pb2.CreateInventoryRequest.SerializeToString,
-                response_deserializer=inventory__pb2.InventoryResponse.FromString,
+                request_serializer=app_dot_proto_dot_inventory__pb2.CreateInventoryRequest.SerializeToString,
+                response_deserializer=app_dot_proto_dot_inventory__pb2.InventoryResponse.FromString,
                 _registered_method=True)
         self.GetInventory = channel.unary_unary(
                 '/inventory.InventoryService/GetInventory',
-                request_serializer=inventory__pb2.InventoryRequest.SerializeToString,
-                response_deserializer=inventory__pb2.InventoryResponse.FromString,
+                request_serializer=app_dot_proto_dot_inventory__pb2.InventoryRequest.SerializeToString,
+                response_deserializer=app_dot_proto_dot_inventory__pb2.InventoryResponse.FromString,
                 _registered_method=True)
         self.UpdateInventory = channel.unary_unary(
                 '/inventory.InventoryService/UpdateInventory',
-                request_serializer=inventory__pb2.InventoryUpdateRequest.SerializeToString,
-                response_deserializer=inventory__pb2.UpdateInventoryResponse.FromString,
+                request_serializer=app_dot_proto_dot_inventory__pb2.InventoryUpdateRequest.SerializeToString,
+                response_deserializer=app_dot_proto_dot_inventory__pb2.UpdateInventoryResponse.FromString,
                 _registered_method=True)
         self.ListInventory = channel.unary_unary(
                 '/inventory.InventoryService/ListInventory',
-                request_serializer=inventory__pb2.Empty.SerializeToString,
-                response_deserializer=inventory__pb2.InventoryList.FromString,
+                request_serializer=app_dot_proto_dot_inventory__pb2.Empty.SerializeToString,
+                response_deserializer=app_dot_proto_dot_inventory__pb2.InventoryList.FromString,
                 _registered_method=True)
         self.GetInventoryByProductId = channel.unary_unary(
                 '/inventory.InventoryService/GetInventoryByProductId',
-                request_serializer=inventory__pb2.InventoryRequestByProductId.SerializeToString,
-                response_deserializer=inventory__pb2.InventoryResponseByProductId.FromString,
+                request_serializer=app_dot_proto_dot_inventory__pb2.InventoryRequestByProductId.SerializeToString,
+                response_deserializer=app_dot_proto_dot_inventory__pb2.InventoryResponseByProductId.FromString,
                 _registered_method=True)
 
 
@@ -107,28 +107,28 @@ def add_InventoryServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'CreateInventory': grpc.unary_unary_rpc_method_handler(
                     servicer.CreateInventory,
-                    request_deserializer=inventory__pb2.CreateInventoryRequest.FromString,
-                    response_serializer=inventory__pb2.InventoryResponse.SerializeToString,
+                    request_deserializer=app_dot_proto_dot_inventory__pb2.CreateInventoryRequest.FromString,
+                    response_serializer=app_dot_proto_dot_inventory__pb2.InventoryResponse.SerializeToString,
             ),
             'GetInventory': grpc.unary_unary_rpc_method_handler(
                     servicer.GetInventory,
-                    request_deserializer=inventory__pb2.InventoryRequest.FromString,
-                    response_serializer=inventory__pb2.InventoryResponse.SerializeToString,
+                    request_deserializer=app_dot_proto_dot_inventory__pb2.InventoryRequest.FromString,
+                    response_serializer=app_dot_proto_dot_inventory__pb2.InventoryResponse.SerializeToString,
             ),
             'UpdateInventory': grpc.unary_unary_rpc_method_handler(
                     servicer.UpdateInventory,
-                    request_deserializer=inventory__pb2.InventoryUpdateRequest.FromString,
-                    response_serializer=inventory__pb2.UpdateInventoryResponse.SerializeToString,
+                    request_deserializer=app_dot_proto_dot_inventory__pb2.InventoryUpdateRequest.FromString,
+                    response_serializer=app_dot_proto_dot_inventory__pb2.UpdateInventoryResponse.SerializeToString,
             ),
             'ListInventory': grpc.unary_unary_rpc_method_handler(
                     servicer.ListInventory,
-                    request_deserializer=inventory__pb2.Empty.FromString,
-                    response_serializer=inventory__pb2.InventoryList.SerializeToString,
+                    request_deserializer=app_dot_proto_dot_inventory__pb2.Empty.FromString,
+                    response_serializer=app_dot_proto_dot_inventory__pb2.InventoryList.SerializeToString,
             ),
             'GetInventoryByProductId': grpc.unary_unary_rpc_method_handler(
                     servicer.GetInventoryByProductId,
-                    request_deserializer=inventory__pb2.InventoryRequestByProductId.FromString,
-                    response_serializer=inventory__pb2.InventoryResponseByProductId.SerializeToString,
+                    request_deserializer=app_dot_proto_dot_inventory__pb2.InventoryRequestByProductId.FromString,
+                    response_serializer=app_dot_proto_dot_inventory__pb2.InventoryResponseByProductId.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -160,8 +160,8 @@ class InventoryService(object):
             request,
             target,
             '/inventory.InventoryService/CreateInventory',
-            inventory__pb2.CreateInventoryRequest.SerializeToString,
-            inventory__pb2.InventoryResponse.FromString,
+            app_dot_proto_dot_inventory__pb2.CreateInventoryRequest.SerializeToString,
+            app_dot_proto_dot_inventory__pb2.InventoryResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -187,8 +187,8 @@ class InventoryService(object):
             request,
             target,
             '/inventory.InventoryService/GetInventory',
-            inventory__pb2.InventoryRequest.SerializeToString,
-            inventory__pb2.InventoryResponse.FromString,
+            app_dot_proto_dot_inventory__pb2.InventoryRequest.SerializeToString,
+            app_dot_proto_dot_inventory__pb2.InventoryResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -214,8 +214,8 @@ class InventoryService(object):
             request,
             target,
             '/inventory.InventoryService/UpdateInventory',
-            inventory__pb2.InventoryUpdateRequest.SerializeToString,
-            inventory__pb2.UpdateInventoryResponse.FromString,
+            app_dot_proto_dot_inventory__pb2.InventoryUpdateRequest.SerializeToString,
+            app_dot_proto_dot_inventory__pb2.UpdateInventoryResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -241,8 +241,8 @@ class InventoryService(object):
             request,
             target,
             '/inventory.InventoryService/ListInventory',
-            inventory__pb2.Empty.SerializeToString,
-            inventory__pb2.InventoryList.FromString,
+            app_dot_proto_dot_inventory__pb2.Empty.SerializeToString,
+            app_dot_proto_dot_inventory__pb2.InventoryList.FromString,
             options,
             channel_credentials,
             insecure,
@@ -268,8 +268,8 @@ class InventoryService(object):
             request,
             target,
             '/inventory.InventoryService/GetInventoryByProductId',
-            inventory__pb2.InventoryRequestByProductId.SerializeToString,
-            inventory__pb2.InventoryResponseByProductId.FromString,
+            app_dot_proto_dot_inventory__pb2.InventoryRequestByProductId.SerializeToString,
+            app_dot_proto_dot_inventory__pb2.InventoryResponseByProductId.FromString,
             options,
             channel_credentials,
             insecure,
