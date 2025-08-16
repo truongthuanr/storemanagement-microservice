@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 from uuid import uuid4
 from datetime import datetime, timezone
 from fastapi import Request
+import json
 
 
 from app import crud, schemas
@@ -16,18 +17,14 @@ from app.servicelogging.servicelogger import logger
 
 # Message format
 # {
-# "event": "order.created",
-# "timestamp": "2025-07-18T14:00:00Z",
-# "correlation_id": "abc123-xyz789",
-# "producer": "order-service",
-# "data": {
-#     "order_id": "order_001",
-#     "user_id": 123,
-#     "items": [
-#     { "product_id": 1, "quantity": 2 },
-#     { "product_id": 2, "quantity": 1 }
-#     ]
-# }
+#   "event": "order.inventory_reserved",
+#   "timestamp": "...",
+#   "correlation_id": "...",
+#   "producer": "inventory-service",
+#   "order_id": 123,
+#   "status": "reserved",   // or "failed"
+#   "items": [ ... ],
+#   "reason": "..."
 # }
 class OrderService:
     def __init__(self, publisher, producer_name: str = "order-service"):
@@ -93,13 +90,11 @@ class OrderService:
         async with message.process():
             try:
                 payload = json.loads(message.body)
-                data = payload.get("data", {})
-
-                order_id = int(data["order_id"])
-                success = data.get("success", False)
-                reserved_items = data.get("reserved_items", [])
-                reason = data.get("reason")
-
+                order_id = int(payload["order_id"])
+                success = payload.get("status") == "reserved"
+                reserved_items = payload.get("items", [])
+                reason = payload.get("reason")
+                
                 with SessionLocal() as db:   # session per message
                     try:
                         order = order_crud.set_order_status(db, order_id, success, reason)
