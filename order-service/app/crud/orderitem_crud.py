@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
-from app.models.order_item import OrderItem
-from app.schemas.order_item import OrderItemCreate
+from app.models.orderitem_model import OrderItem
+from app.schemas.orderitem_schema import OrderItemCreate
 from typing import List, Optional
 
 
@@ -53,3 +53,21 @@ def delete_order_item(db: Session, item_id: int) -> bool:
     db.delete(item)
     db.commit()
     return True
+
+def update_reserved_items(db: Session, order_id: int, reserved_items: list):
+    """
+    Update prices and subtotals for reserved items.
+    """
+    for reserved in reserved_items:
+        db_item = (
+            db.query(OrderItem)
+            .filter(
+                OrderItem.order_id == order_id,
+                OrderItem.product_id == reserved["product_id"]
+            )
+            .first()
+        )
+        if db_item:
+            db_item.price_per_unit = reserved["price_per_unit"]
+            db_item.subtotal = db_item.price_per_unit * db_item.quantity
+            db.add(db_item)

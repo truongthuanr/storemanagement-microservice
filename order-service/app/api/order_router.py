@@ -20,8 +20,7 @@ router = APIRouter(
 )
 
 def get_order_service(request: Request) -> OrderService:
-    publisher = PublisherAdapter(request.app)
-    return OrderService(publisher=publisher)
+    return request.app.state.order_service   # instance global
 
 @router.post("/", response_model=OrderRead, status_code=status.HTTP_201_CREATED)
 def create_order(order: OrderCreate, db: Session = Depends(get_db)):
