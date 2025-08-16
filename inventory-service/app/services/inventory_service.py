@@ -1,7 +1,7 @@
 # app/services/inventory_service.py
 from __future__ import annotations
 from sqlalchemy.orm import Session
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Tuple
 from datetime import datetime, timezone
 from sqlalchemy.orm import sessionmaker, declarative_base, Session
 
@@ -9,7 +9,7 @@ from sqlalchemy.orm import sessionmaker, declarative_base, Session
 from app.database import SessionLocal
 from app.crud import inventory_crud
 from app.servicelogging.servicelogger import logger
-from app.schemas.inventory_response import InventoryResponseMessage, InventoryItemResult
+from app.schemas.inventory_response import InventoryResponseMessage, InventoryItemResult, ReserveStockResult
 from app.broker.publisher import publish_event
 
 
@@ -62,41 +62,55 @@ def delete_inventory(db: Session, inv_id: int) -> bool:
 
 
 # ---------- Domain logic used by Order -----------------------------
-def reserve_stock(db: Session, items: List[Dict]) -> Tuple[bool, List[Dict], Optional[str]]:
+def reserve_stock(db: Session, items: List[Dict]) -> ReserveStockResult:
     """
     items = [{"product_id": int, "quantity": int}, ...]
-    Returns:
-        ok (bool) - True if stock is sufficient and reserved, False if insufficient
-        reserved_items (list) - List of successfully reserved products
-        reason (str|None) - Failure reason (if any)
     """
-    logger.info("Function start!")
-    reserved_items = []
-    reason = None
-
-    # 1. Kiểm tra đủ hàng
-    logger.info("Check each item")
+    logger.info("▶️ reserve_stock function start")
+    reserved_items: List[InventoryItemResult] = []
     for it in items:
-        m = inventory_crud.get_stock_by_productid(db, it["product_id"])
-        if not m or m < it["quantity"]:
-            logger.info(
-                f"Insufficient stock for item_id={it['product_id']}: "
-                f"requested={it['quantity']}, available={m if m else 'None'}"
+        logger.info(f"🔍 Checking product_id={it['product_id']} with requested quantity={it['quantity']}")
+
+        _inventory = inventory_crud.get_inventory_by_product_id(db, product_id=it["product_id"])
+        logger.debug(f"_inventory: {_inventory}")
+        if not _inventory:
+            reason = f"❌ Product not found: product_id={it['product_id']}"
+            logger.warning(reason)
+            return ReserveStockResult(ok=False, reserved_items=[], reason=reason)
+
+        logger.debug(
+            f"Available stock={_inventory.stock}, unit_price={_inventory.price} "
+            f"for product_id={it['product_id']}"
+        )
+
+        if _inventory.stock < it["quantity"]:
+            reason = (
+                f"❌ Insufficient stock for product_id={it['product_id']}: "
+                f"requested={it['quantity']}, available={_inventory.stock}"
             )
-            reason = f"Insufficient stock for product_id={it['product_id']}"
-            return False, reserved_items, reason
+            logger.warning(reason)
+            return ReserveStockResult(ok=False, reserved_items=[], reason=reason)
 
-    # 2. Reserve stock
-    for it in items:
-        m = inventory_crud.get_stock_by_productid(db, it["product_id"])
-        inventory_crud.update_inventory(db, it["product_id"], stock=m - it["quantity"])
-        reserved_items.append({
-            "product_id": it["product_id"],
-            "quantity": it["quantity"]
-        })
+        # Reserve stock
+        new_stock = _inventory.stock - it["quantity"]
+        inventory_crud.update_inventory(db, _inventory.id, stock=new_stock)
+        logger.info(
+            f"✅ Reserved product_id={it['product_id']}, quantity={it['quantity']}, "
+            f"new_stock={new_stock}"
+        )
 
-    logger.info("Stock check passed for all items.")
-    return True, reserved_items, reason
+        reserved_items.append(
+            InventoryItemResult(
+                product_id=it["product_id"],
+                quantity=it["quantity"],
+                unit_price=_inventory.price
+            )
+        )
+
+    logger.info("🎉 Stock check passed for all items, reservation successful.")
+    return ReserveStockResult(ok=True, reserved_items=reserved_items)
+
+
 
 async def handle_order_created(payload: dict, correlation_id: str):
     order_id = payload["order_id"]
@@ -104,7 +118,12 @@ async def handle_order_created(payload: dict, correlation_id: str):
 
     db = SessionLocal()
     try:
-        ok, reserved_items, reason = reserve_stock(db, items)
+        result = reserve_stock(db, items)
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        logger.exception(f"❌ Error reserving stock for order_id={order_id}")
+        raise
     finally:
         db.close()
 
@@ -114,9 +133,10 @@ async def handle_order_created(payload: dict, correlation_id: str):
         correlation_id=correlation_id,
         producer="inventory-service",
         order_id=order_id,
-        status="reserved" if ok else "failed",
-        items=[InventoryItemResult(**item) for item in reserved_items],
-        reason=reason
+        status="reserved" if result.ok else "failed",
+        items=result.reserved_items,   # list[InventoryItemResult]
+        reason=result.reason
     )
 
     await publish_event("order.inventory_reserved", msg.model_dump())
+    logger.info(f"📤 Sent inventory response for order_id={order_id}, status={msg.status}")

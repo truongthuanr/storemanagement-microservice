@@ -8,6 +8,9 @@ from sqlalchemy import func
 def get_inventory_by_id(db: Session, inventory_id: int) -> Inventory | None:
     return db.query(Inventory).filter(Inventory.id == inventory_id).first()
 
+def get_inventory_by_product_id(db: Session, product_id: int) -> Inventory | None:
+    return db.query(Inventory).filter(Inventory.product_id == product_id).first()
+
 # def get_stock_by_productid(db: Session, product_id: int) -> int | None:
 #     logger.info("Function Start!")
 #     result = db.query(func.sum(Inventory.stock)) \
