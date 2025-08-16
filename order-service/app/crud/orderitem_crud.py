@@ -68,6 +68,6 @@ def update_reserved_items(db: Session, order_id: int, reserved_items: list):
             .first()
         )
         if db_item:
-            db_item.price_per_unit = reserved["price_per_unit"]
+            db_item.price_per_unit = reserved["unit_price"]
             db_item.subtotal = db_item.price_per_unit * db_item.quantity
             db.add(db_item)
