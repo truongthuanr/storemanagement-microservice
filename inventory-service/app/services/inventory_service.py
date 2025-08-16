@@ -62,27 +62,41 @@ def delete_inventory(db: Session, inv_id: int) -> bool:
 
 
 # ---------- Domain logic used by Order -----------------------------
-def reserve_stock(db: Session, items: List[Dict]) -> bool:
+def reserve_stock(db: Session, items: List[Dict]) -> Tuple[bool, List[Dict], Optional[str]]:
     """
-    items = [{"id": int, "quantity": int}, ...]
-    Trả True nếu đủ hàng & đã trừ, False nếu thiếu.
+    items = [{"product_id": int, "quantity": int}, ...]
+    Returns:
+        ok (bool) - True if stock is sufficient and reserved, False if insufficient
+        reserved_items (list) - List of successfully reserved products
+        reason (str|None) - Failure reason (if any)
     """
     logger.info("Function start!")
+    reserved_items = []
+    reason = None
+
     # 1. Kiểm tra đủ hàng
     logger.info("Check each item")
     for it in items:
         m = inventory_crud.get_stock_by_productid(db, it["product_id"])
         if not m or m < it["quantity"]:
-            logger.info(f"Insufficient stock for item_id={it['product_id']}: requested={it['quantity']}, available={m if m else 'None'}")
-            return False
-    # 2. Trừ kho
+            logger.info(
+                f"Insufficient stock for item_id={it['product_id']}: "
+                f"requested={it['quantity']}, available={m if m else 'None'}"
+            )
+            reason = f"Insufficient stock for product_id={it['product_id']}"
+            return False, reserved_items, reason
+
+    # 2. Reserve stock
     for it in items:
         m = inventory_crud.get_stock_by_productid(db, it["product_id"])
-        inventory_crud.update_inventory(db, it["product_id"], stock=m-it["quantity"])
+        inventory_crud.update_inventory(db, it["product_id"], stock=m - it["quantity"])
+        reserved_items.append({
+            "product_id": it["product_id"],
+            "quantity": it["quantity"]
+        })
 
     logger.info("Stock check passed for all items.")
-
-    return True
+    return True, reserved_items, reason
 
 async def handle_order_created(payload: dict, correlation_id: str):
     order_id = payload["order_id"]
@@ -95,7 +109,7 @@ async def handle_order_created(payload: dict, correlation_id: str):
         db.close()
 
     msg = InventoryResponseMessage(
-        event="inventory.response",
+        event="order.inventory_reserved",
         timestamp=datetime.now(timezone.utc),
         correlation_id=correlation_id,
         producer="inventory-service",
@@ -105,4 +119,4 @@ async def handle_order_created(payload: dict, correlation_id: str):
         reason=reason
     )
 
-    await publish_event("inventory.response", msg.model_dump())
+    await publish_event("order.inventory_reserved", msg.model_dump())

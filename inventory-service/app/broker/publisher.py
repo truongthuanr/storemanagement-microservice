@@ -12,7 +12,7 @@ async def publish_event(routing_key: str, message: dict):
     ch = await get_channel()
     await ch.default_exchange.publish(
         aio_pika.Message(
-            body=json.dumps(message).encode(),
+            body=json.dumps(message, default=str).encode(),
             content_type="application/json"
         ),
         routing_key=routing_key

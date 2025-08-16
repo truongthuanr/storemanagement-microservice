@@ -1,9 +1,11 @@
 import logging
 import sys
+import os
 
 def setup_logger(name: str = "inventory-service") -> logging.Logger:
     logger = logging.getLogger(name)
-    logger.setLevel(logging.INFO)
+    log_level = os.getenv("LOG_LEVEL", "INFO").upper()
+    logger.setLevel(getattr(logging, log_level, logging.INFO)) 
 
     # Tránh tạo nhiều handler nếu gọi nhiều lần
     if not logger.handlers:

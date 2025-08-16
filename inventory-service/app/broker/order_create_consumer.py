@@ -45,6 +45,11 @@ from app.schemas.inventory_response import InventoryResponseMessage, InventoryIt
 async def _handle_order_created(msg: aio_pika.IncomingMessage):
     async with msg.process():
         try:
+            logger.debug(
+                f"[order.created] Incoming message | "
+                f"RoutingKey={msg.routing_key} | "
+                f"Body={msg.body.decode('utf-8')}"
+            )
             message = json.loads(msg.body)
             correlation_id = message["correlation_id"]
             payload = message["data"]
