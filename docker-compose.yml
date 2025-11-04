@@ -144,10 +144,41 @@ services:
     networks:
       - backend
 
+  # Auth service + DB
+  auth-db:
+    image: mysql:8.0
+    container_name: auth-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: auth_db
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    ports:
+      - "3307:3306"
+    volumes:
+      - auth-db-data:/var/lib/mysql
+    networks:
+      - backend
+
+  auth-service:
+    build: ./auth-service
+    container_name: auth-service
+    depends_on:
+      - auth-db
+    environment:
+      - DATABASE_URL=mysql+pymysql://user:password@auth-db:3306/auth_db
+      - ENV=dev
+    ports:
+      - "8000:8000"
+    networks:
+      - backend
+
 volumes:
   order-db-data:
   inventory-db-data:
   product-db-data:
+  auth-db-data:
 
 networks:
   backend:
